@@ -22,8 +22,6 @@
 using namespace std;
 
 
-
-
 int main() {
 	ifstream f;
 	f.open("WattsStrog.txt");
