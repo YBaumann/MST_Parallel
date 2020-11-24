@@ -4,7 +4,7 @@ This is a Repo that stores all files related to any work regarding Parallel Algo
 
 
 
-
+Work-Log
 ---------
 
 24/11/20
@@ -14,6 +14,3 @@ we can now use a newer Version of OPEN MP including atomics
 The next step is to code a parallel boruvka.
 
 ---------
-
-
-Current developement is on Visual Studio 2019 with OPENMP 2.0
