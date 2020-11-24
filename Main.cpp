@@ -12,7 +12,7 @@
 #include "headers\BoruvkaSeq.h"
 #include "headers\KruskalSeq.h"
 #include "headers\CheckConnectivity.h"
-#include "headers\PrimSeq.h"
+#include "headers\PrimSeq.h" 
 
 
 
