@@ -7,13 +7,12 @@
 #include <set>
 #include <algorithm>
 #include <cassert>
-#include "Structures.h"
+#include "headers\Structures.h"
 
-#include "BoruvkaSeq.h"
-#include "KruskalSeq.h"
-#include "CheckConnectivity.h"
-#include "PrimSeq.h"
-#include "BaderCongSeq.h"
+#include "headers\BoruvkaSeq.h"
+#include "headers\KruskalSeq.h"
+#include "headers\CheckConnectivity.h"
+#include "headers\PrimSeq.h"
 
 
 
@@ -24,7 +23,7 @@ using namespace std;
 
 int main() {
 	ifstream f;
-	f.open("WattsStrog.txt");
+	f.open("Resources/WattsStrog.txt");
 	vector<edge> edgeList;
 	int n; f >> n;
 	int m; f >> m;
@@ -48,9 +47,6 @@ int main() {
 	//resultKruskal = MinimumSpanningTreeKruskalSeq(edgeList, n, m);
 	vector<edge> resultPrim;
 	//resultPrim = MinimumSpanningTreePrimSeq(edgeList, n, m);
-
-	vector<edge> resultBC;
-	resultBC = MinimumSpanningTreeBaderCongSeq(edgeList, n, m);
 
 
 	return 0;
