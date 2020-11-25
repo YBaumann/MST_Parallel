@@ -33,7 +33,7 @@ void BoruvkaStepSeq(set<edge>& mst, vector<edge>& edgelist, UnionFind UF, int n)
 
 	}
 
-	std::cout << "Checkpoint finding best edges of round done!"; nn;
+	//std::cout << "Checkpoint finding best edges of round done!"; nn;
 
 	for (int i = 0; i < n; i++) {
 		if (BestOutgoingEdges[i].weight != 0) {
@@ -41,7 +41,7 @@ void BoruvkaStepSeq(set<edge>& mst, vector<edge>& edgelist, UnionFind UF, int n)
 			UF.merge(BestOutgoingEdges[i].source, BestOutgoingEdges[i].dest);
 		}
 	}
-	std::cout << "Checkpoint: contraction done"; nn;
+	//std::cout << "Checkpoint: contraction done"; nn;
 
 }
 
@@ -50,17 +50,17 @@ vector<edge> MinimumSpanningTreeBoruvkaSeq(vector<edge> edgelist, int n, int m) 
 	set<edge> mst; // edgelist of final MST
 	UnionFind UF(n);
 
-	std::cout << "Checkpoint Unionfind created"; nn;
+	//std::cout << "Checkpoint Unionfind created"; nn;
 
 	int rounds = 0;
 	int last_round_size = mst.size();
 	while (mst.size() < n - 1) { // while we dont have a full tree
 		BoruvkaStepSeq(mst, edgelist, UF, n); // do one step
 		rounds++;
-		std::cout << "We have done " << rounds << " Boruvka steps"; nn;
+		//std::cout << "We have done " << rounds << " Boruvka steps"; nn;
 		assert(last_round_size < mst.size() && "Size has not increased in this round!");
 		last_round_size = mst.size();
-		std::cout << mst.size(); nn;
+		//std::cout << mst.size(); nn;
 	}
 
 	vector<edge> result;

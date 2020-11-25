@@ -22,11 +22,11 @@ using namespace std;
 int main() {
 
 	ofstream f;
-	f.open("Graph.txt");
+	f.open("Resources/WattsStrogatz1M.txt");
 
 	// It must hold N >> K >> ln N >> 1
 
-	int N = 10000; // nodes in Graph
+	int N = 100000; // nodes in Graph
 	int K = 120; // average degree
 	double beta = 0.3; // 0 <= beta <= 1!
 
@@ -37,7 +37,7 @@ int main() {
 		set<int> li;
 		adjlist.push_back(li);
 	}
-
+	std::cout << "here";
 	// 1. step Create Lattice for given K and N
 	// two for loops can be *heavily* optimized to run in O(N * K)
 
@@ -48,14 +48,17 @@ int main() {
 				adjlist[j].insert(i);
 			}
 		}
+		if(i % 100 == 0)
+		std::cout << i;
 	}
+	std::cout << "further";
 	int edges = 0;
 	for (auto e : adjlist) {
 		for (auto es : e) {
 			edges++;
 		}
 	}
-	std::cout << edges; nn;
+	std::cout << "1step";
 
 
 

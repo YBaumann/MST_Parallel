@@ -24,7 +24,7 @@ using namespace std;
 
 int main() {
 	ifstream f;
-	f.open("Resources/WattsStrog.txt");
+	f.open("Resources/WattsStrogatz100K.txt");
 	vector<edge> edgeList;
 	int n; f >> n;
 	int m; f >> m;
@@ -43,12 +43,11 @@ int main() {
 	assert(is_Connected(edgeList, n, m));
 	std::cout << "Checkpoint is Connected"; nn;
 	vector<edge> resultBoruvka;
-	//resultBoruvka = MinimumSpanningTreeBoruvkaSeq(edgeList,n,m);
-	vector<edge> resultKruskal;
-	//resultKruskal = MinimumSpanningTreeKruskalSeq(edgeList, n, m);
-	vector<edge> resultPrim;
-	//resultPrim = MinimumSpanningTreePrimSeq(edgeList, n, m);
+	for(int i = 0; i< 1000; i++){
 	resultBoruvka = MinimumSpanningTreeBoruvkaPar(edgeList,n,m);
+	std::cout <<i;
+	}
+	std::cout << resultBoruvka.size();
 
 	return 0;
 }
