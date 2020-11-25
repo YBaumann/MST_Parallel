@@ -7,12 +7,13 @@
 #include <set>
 #include <algorithm>
 #include <cassert>
+#include <omp.h>
 #include "headers\Structures.h"
-
 #include "headers\BoruvkaSeq.h"
 #include "headers\KruskalSeq.h"
 #include "headers\CheckConnectivity.h"
 #include "headers\PrimSeq.h" 
+#include "headers\BoruvkaPara.h"
 
 
 
@@ -47,7 +48,7 @@ int main() {
 	//resultKruskal = MinimumSpanningTreeKruskalSeq(edgeList, n, m);
 	vector<edge> resultPrim;
 	//resultPrim = MinimumSpanningTreePrimSeq(edgeList, n, m);
-
+	resultBoruvka = MinimumSpanningTreeBoruvkaPar(edgeList,n,m);
 
 	return 0;
 }
