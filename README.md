@@ -8,6 +8,14 @@ Work-Log
 
 ---------
 
+26/11/20
+I parallelized the single loop in Boruvkastep without any careful adjustements.
+I ran a simple test and took the mean runtime, this to my surprise I got a nice speedup for parallel implementation.
+
+This could also be because of other things than parallelization.
+
+---------
+
 25/11/20
 
 I set up the files for Boruvka parallel and environment for my laptop.
