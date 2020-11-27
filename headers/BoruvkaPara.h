@@ -55,7 +55,7 @@ void BoruvkaStepPar(set<edge>& mst, vector<edge>& edgelist, UnionFind UF, int n)
 
 vector<edge> MinimumSpanningTreeBoruvkaPar(vector<edge> edgelist, int n, int m) { // This implementation is based on an adjacency list
     // design variables
-    int numThreads = 1000;
+    int numThreads = 32;
     omp_set_num_threads(numThreads);
 
     // Actual Code

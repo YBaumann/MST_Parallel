@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cassert>
 #include <omp.h>
+#include <chrono>
 #include "headers\Structures.h"
 #include "headers\BoruvkaSeq.h"
 #include "headers\KruskalSeq.h"
@@ -43,11 +44,24 @@ int main() {
 	assert(is_Connected(edgeList, n, m));
 	std::cout << "Checkpoint is Connected"; nn;
 	vector<edge> resultBoruvka;
-	for(int i = 0; i< 1000; i++){
+
+	auto totalDur = 0;
+	long long ma = 0;
+	long long mi = 100000000;
+	for(int i = 0; i< 100; i++){
+	auto t1 = std::chrono::high_resolution_clock::now();
 	resultBoruvka = MinimumSpanningTreeBoruvkaPar(edgeList,n,m);
+    auto t2 = std::chrono::high_resolution_clock::now();
+	ma = max(ma, std::chrono::duration_cast<std::chrono::microseconds>(t2-t1).count());
+	mi = min(mi, std::chrono::duration_cast<std::chrono::microseconds>(t2-t1).count());
 	std::cout <<i;
+	totalDur += std::chrono::duration_cast<std::chrono::microseconds>(t2-t1).count();
 	}
-	std::cout << resultBoruvka.size();
+	nn;
+	std::cout << "Time is: ";
+	std::cout << totalDur / 100.0;nn;
+	std::cout << "The min is: " << mi << " and the max is: " << ma;
+
 
 	return 0;
 }
