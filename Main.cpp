@@ -7,14 +7,6 @@
 #include <set>
 #include <algorithm>
 #include <cassert>
-<<<<<<< HEAD
-#include "headers\Structures.h"
-
-#include "headers\BoruvkaSeq.h"
-#include "headers\KruskalSeq.h"
-#include "headers\CheckConnectivity.h"
-#include "headers\PrimSeq.h"
-=======
 #include <omp.h>
 #include <chrono>
 #include "headers\Structures.h"
@@ -23,7 +15,6 @@
 #include "headers\CheckConnectivity.h"
 #include "headers\PrimSeq.h" 
 #include "headers\BoruvkaPara.h"
->>>>>>> 0cdac70e4c4264b26e34efe0ca0c897f1ee735ed
 
 
 
@@ -34,11 +25,7 @@ using namespace std;
 
 int main() {
 	ifstream f;
-<<<<<<< HEAD
-	f.open("Resources/WattsStrog.txt");
-=======
 	f.open("Resources/WattsStrogatz100K.txt");
->>>>>>> 0cdac70e4c4264b26e34efe0ca0c897f1ee735ed
 	vector<edge> edgeList;
 	int n; f >> n;
 	int m; f >> m;
@@ -57,13 +44,6 @@ int main() {
 	assert(is_Connected(edgeList, n, m));
 	std::cout << "Checkpoint is Connected"; nn;
 	vector<edge> resultBoruvka;
-<<<<<<< HEAD
-	//resultBoruvka = MinimumSpanningTreeBoruvkaSeq(edgeList,n,m);
-	vector<edge> resultKruskal;
-	//resultKruskal = MinimumSpanningTreeKruskalSeq(edgeList, n, m);
-	vector<edge> resultPrim;
-	//resultPrim = MinimumSpanningTreePrimSeq(edgeList, n, m);
-=======
 
 	auto totalDur = 0;
 	long long ma = 0;
@@ -81,7 +61,6 @@ int main() {
 	std::cout << "Time is: ";
 	std::cout << totalDur / 100.0;nn;
 	std::cout << "The min is: " << mi << " and the max is: " << ma;
->>>>>>> 0cdac70e4c4264b26e34efe0ca0c897f1ee735ed
 
 
 	return 0;
