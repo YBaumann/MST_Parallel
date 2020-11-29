@@ -1,0 +1,16 @@
+25.11 
+This is not a conclusive test!
+I tested The Code of Boruvka parallel vs sequential. I have not optimized anything for cachehitrate.
+I ran the function 100 times and took the mean for every level of optimization.
+
+Avg Time for Boruvka Parallel: 32 threads, 100K Vertices 6M edges
+660'908 microseconds no optimization
+314'733 O1 optimization
+305'053 O2 optimization
+
+
+Avg Time for Boruvka Seq: 100K Vertices, 6M edges
+1'385'360 microseconds no optimization
+395'562 O1 optimization
+400'094 O2 optimization
+
