@@ -33,7 +33,7 @@ int main() {
 		f >> e.source >> e.dest >> e.weight;
 		edgeList.push_back(e);
 	}
-
+ 
 	std::cout << "Hi";
 
 	assert(m == edgeList.size() && "m != edgelist size");
