@@ -12,19 +12,13 @@
 
 #define nn std::cout << "\n"
 
-// the idea for parallel boruvka is, to compute the Bourvka steps in parallel.
-// In each Boruvka step we loop through all remaining vertices and "acquire" the smallest incident edge.
-// then we can contract these edges in a sequential step (or we do a BSP contraction.)
-// if we make the mst unique we can even use a sequential Union Find (non BSP)
 
 void BoruvkaStepPar(set<edge>& mst, vector<edge>& edgelist, UnionFind UF, int n){
-    vector<edge> BestOutgoingEdges(n); // safe the best edges for each supervertex this round
+    vector<edge> BestOutgoingEdges(n); 
+	omp_set_num_threads(100);
 
 
 
-    // We could theoretically have atomic writes to bestoutgoing edges and then do this in parallel,
-    // Can we think of a version that does not need sequential consistency?
-    #pragma omp parallel for
 	for (int i = 0; i < edgelist.size(); i++) { // loop through all edges and find the current best edges
 		edge e = edgelist[i];
 		int superSource = UF.find(e.source);
@@ -37,18 +31,17 @@ void BoruvkaStepPar(set<edge>& mst, vector<edge>& edgelist, UnionFind UF, int n)
 				BestOutgoingEdges[superDest] = e;
 			}
 		}
-
 	}
 
-	//std::cout << "Checkpoint finding best edges of round done!"; nn;
-
+	
+#pragma omp parallel for ordered
 	for (int i = 0; i < n; i++) {
 		if (BestOutgoingEdges[i].weight != 0) {
 			mst.insert(BestOutgoingEdges[i]);
 			UF.merge(BestOutgoingEdges[i].source, BestOutgoingEdges[i].dest);
 		}
 	}
-	//std::cout << "Checkpoint: contraction done"; nn;
+
 
 
 }

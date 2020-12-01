@@ -34,19 +34,8 @@ int main() {
 		edgeList.push_back(e);
 	}
  
-	omp_set_num_threads(1000);
-
-	int temp[10];
-	int s = 0;
-	int v = -1;
-	std::cout << v << "\n";
-	#pragma omp parallel
-		for(int i = 0; i < 10000; i++){
-		v = s;
-		s++;
-		}
-
-	std::cout << v;
+	
+	vector<edge> mst = MinimumSpanningTreeBoruvkaPar(edgeList, n, m);
 	
 
 
