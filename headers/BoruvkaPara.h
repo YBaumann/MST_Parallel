@@ -49,7 +49,7 @@ void BoruvkaStepPar(set<edge>& mst, vector<edge>& edgelist, UnionFind UF, int n)
 		}
 	}
 	//std::cout << "Checkpoint: contraction done"; nn;
-
+ 
 
 }
 
