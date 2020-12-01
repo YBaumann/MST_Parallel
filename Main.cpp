@@ -16,8 +16,6 @@
 #include "headers\PrimSeq.h" 
 #include "headers\BoruvkaPara.h"
 
-
-
 // We want the output to be an edgelist with edgeids, sorted
 
 using namespace std;
@@ -45,23 +43,7 @@ int main() {
 	std::cout << "Checkpoint is Connected"; nn;
 	vector<edge> resultBoruvka;
 
-	auto totalDur = 0;
-	long long ma = 0;
-	long long mi = 100000000;
-	for(int i = 0; i< 100; i++){
-	auto t1 = std::chrono::high_resolution_clock::now();
-	resultBoruvka = MinimumSpanningTreeBoruvkaPar(edgeList,n,m);
-    auto t2 = std::chrono::high_resolution_clock::now();
-	ma = max(ma, std::chrono::duration_cast<std::chrono::microseconds>(t2-t1).count());
-	mi = min(mi, std::chrono::duration_cast<std::chrono::microseconds>(t2-t1).count());
-	std::cout <<i;
-	totalDur += std::chrono::duration_cast<std::chrono::microseconds>(t2-t1).count();
-	}
-	nn;
-	std::cout << "Time is: ";
-	std::cout << totalDur / 100.0;nn;
-	std::cout << "The min is: " << mi << " and the max is: " << ma;
-
+	std::cout << "Well this works";
 
 	return 0;
 }
