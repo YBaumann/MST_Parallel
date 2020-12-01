@@ -41,7 +41,6 @@ void BoruvkaStepSeq(set<edge>& mst, vector<edge>& edgelist, UnionFind UF, int n)
 			UF.merge(BestOutgoingEdges[i].source, BestOutgoingEdges[i].dest);
 		}
 	}
-	//std::cout << "Checkpoint: contraction done"; nn;
 
 }
 

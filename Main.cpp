@@ -23,7 +23,7 @@ using namespace std;
 
 int main() {
 	ifstream f;
-	f.open("Resources/WattsStrogatz100K.txt");
+	f.open("Resources/WattsStrog.txt");
 	vector<edge> edgeList;
 	int n; f >> n;
 	int m; f >> m;
@@ -34,16 +34,13 @@ int main() {
 		edgeList.push_back(e);
 	}
  
-	std::cout << "Hi";
+	
+	vector<edge> mst = MinimumSpanningTreeBoruvkaPar(edgeList, n, m);
+	
 
-	assert(m == edgeList.size() && "m != edgelist size");
-	std::cout << "Checkpoint reading InputGraph"; nn;
 
-	assert(is_Connected(edgeList, n, m));
-	std::cout << "Checkpoint is Connected"; nn;
-	vector<edge> resultBoruvka;
 
-	std::cout << "Well this works";
+
 
 	return 0;
 }
