@@ -23,7 +23,7 @@ using namespace std;
 
 int main() {
 	ifstream f;
-	f.open("Resources/WattsStrogatz100K.txt");
+	f.open("Resources/WattsStrog.txt");
 	vector<edge> edgeList;
 	int n; f >> n;
 	int m; f >> m;
@@ -34,16 +34,24 @@ int main() {
 		edgeList.push_back(e);
 	}
  
-	std::cout << "Hi";
+	omp_set_num_threads(1000);
 
-	assert(m == edgeList.size() && "m != edgelist size");
-	std::cout << "Checkpoint reading InputGraph"; nn;
+	int temp[10];
+	int s = 0;
+	int v = -1;
+	std::cout << v << "\n";
+	#pragma omp parallel
+		for(int i = 0; i < 10000; i++){
+		v = s;
+		s++;
+		}
 
-	assert(is_Connected(edgeList, n, m));
-	std::cout << "Checkpoint is Connected"; nn;
-	vector<edge> resultBoruvka;
+	std::cout << v;
+	
 
-	std::cout << "Well this works";
+
+
+
 
 	return 0;
 }
