@@ -19,7 +19,7 @@
 
 void BoruvkaStepPar(set<edge>& mst, vector<edge>& edgelist, UnionFind UF, int n){
     vector<edge> BestOutgoingEdges(n); // safe the best edges for each supervertex this round
-
+	
 
 
     // We could theoretically have atomic writes to bestoutgoing edges and then do this in parallel,
