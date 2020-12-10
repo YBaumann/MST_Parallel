@@ -10,6 +10,7 @@
 #include <omp.h>
 #include <chrono>
 #include "headers\Structures.h"
+#include "headers\EdgelistToAdjArray.h"
 #include "headers\BoruvkaSeq.h"
 #include "headers\KruskalSeq.h"
 #include "headers\CheckConnectivity.h"
@@ -36,14 +37,6 @@ int main() {
  
 	
 	vector<edge> mstp = MinimumSpanningTreeBoruvkaPar(edgeList, n, m);
-	vector<edge> msts = MinimumSpanningTreeBoruvkaPar(edgeList, n, m);
-	int pw = 0;
-	int sw = 0;
-	assert(mstp.size() == msts.size());
-	for(int i = 0; i < mstp.size(); i++){
-		pw += mstp[i].weight;
-		sw += msts[i].weight;
-	}
 
 	
 	

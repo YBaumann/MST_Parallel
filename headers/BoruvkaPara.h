@@ -9,76 +9,75 @@
 #include <algorithm>
 #include <cassert>
 
+#include "ParallelPrefixSum.h"
+#include "BinSearchLowIdx.h"
 
 #define nn std::cout << "\n"
 
-
-void BoruvkaStepPar(set<edge>& mst, vector<edge>& edgelist, UnionFind UF, int n){
-    vector<edge> BestOutgoingEdges(n); 
-	omp_set_num_threads(100);
+// Design variables
+	int numThreads = 32;
 
 
+void BoruvkaStepPar(vector<vector<edge>> &adjArr, vector<edge> &mst, int n, int m)
+{
+	// Divide Workload
+	int workloadPerProcessor = 2 * m / numThreads;
+	int workloadLastProcessor = 2 * m - ((numThreads - 1) * workloadPerProcessor);
+	vector<int> prefix(n);
+	prefixParallel(prefix, adjArr);
+
+// now comes parallel part
 #pragma omp parallel for ordered
-	for (int i = 0; i < edgelist.size(); i++) { // loop through all edges and find the current best edges
-		edge e = edgelist[i];
-		int superSource = UF.find(e.source);
-		int superDest = UF.find(e.dest);
-		if (superSource != superDest) { // belong to different supervertices
-			if (e.weight < BestOutgoingEdges[superSource].weight || BestOutgoingEdges[superSource].weight == 0) { // check if its a best edge for source and replace
-				BestOutgoingEdges[superSource] = e;
-			}
-			if (e.weight < BestOutgoingEdges[superDest].weight || BestOutgoingEdges[superDest].weight == 0) { // check if its a best edge for dest and replace
-				BestOutgoingEdges[superDest] = e;
+	for (int tr = 0; tr < numThreads; tr++)
+	{
+		// organize my workload
+		int Tid = omp_get_thread_num();
+		int startWL = Tid * workloadPerProcessor;	  // included
+		int endWL = (Tid + 1) * workloadPerProcessor; // not included
+		if (Tid == numThreads - 1)
+		{
+			endWL = 2 * m;
+		}
+
+		// find my workloadstart with binsearch
+		int startidx = binSearchlow(prefix, startWL);
+		vector<edge> localEdgeList;
+		int edgeidx = prefix[startidx];
+
+		for(int i = startidx; i < adjArr.size(); i++){
+			for(int j = 0; j < adjArr[i].size(); j++){
+				if(edgeidx >= startWL && edgeidx < endWL){
+					localEdgeList.push_back(adjArr[i][j]);
+				}
+				if(edgeidx > endWL){
+					goto finished;
+				}
+				edgeidx++;
 			}
 		}
+
+		finished:
+		std::cout << localEdgeList.size() << " " << endWL << "\n";
 	}
-
-	
-#pragma omp parallel for ordered
-	for (int i = 0; i < n; i++) {
-		if (BestOutgoingEdges[i].weight != 0) {
-			UF.merge(BestOutgoingEdges[i].source, BestOutgoingEdges[i].dest);
-			#pragma omp ordered
-			{
-				mst.insert(BestOutgoingEdges[i]);
-			}
-		}
-	}
-
-
-
 }
 
-vector<edge> MinimumSpanningTreeBoruvkaPar(vector<edge> edgelist, int n, int m) { // This implementation is based on an adjacency list
-    // design variables
-    int numThreads = 32;
-    omp_set_num_threads(numThreads);
+vector<edge> MinimumSpanningTreeBoruvkaPar(vector<edge> edgelist, int n, int m)
+{
+	omp_set_num_threads(numThreads);
 
-    // Actual Code
+	// Actual Code
+	vector<edge> mst;
 
-    set<edge> mst; // edgelist of final MST
-	UnionFind UF(n);
+	//create adjacency array --> can be parallelized
+	vector<vector<edge>> adjArr = edgeListToAdjArray(edgelist, n);
 
-	//std::cout << "Checkpoint Unionfind for Parallel created"; nn;
+	// form MST
 
-	int rounds = 0;
-	int last_round_size = mst.size();
-	while (mst.size() < n - 1) { // while we dont have a full tree
-		BoruvkaStepPar(mst, edgelist, UF, n); // do one step
-		rounds++;
-		//std::cout << "We have done " << rounds << " Boruvka steps"; nn;
-		assert(last_round_size < mst.size() && "Size has not increased in this round!");
-		last_round_size = mst.size();
-		//std::cout << mst.size(); nn;
+	int t = 1;
+	while (t--)
+	{
+		BoruvkaStepPar(adjArr, mst, n, m);
 	}
 
-	vector<edge> result;
-	for (auto e : mst) {
-		result.push_back(e);
-	}
-
-
-
-	return result;
+	return mst;
 }
-
