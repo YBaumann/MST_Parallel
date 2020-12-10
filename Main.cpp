@@ -23,7 +23,7 @@ using namespace std;
 
 int main() {
 	ifstream f;
-	f.open("Resources/WattsStrog.txt");
+	f.open("Resources/WattsStrogatz100.txt");
 	vector<edge> edgeList;
 	int n; f >> n;
 	int m; f >> m;
@@ -35,7 +35,17 @@ int main() {
 	}
  
 	
-	vector<edge> mst = MinimumSpanningTreeBoruvkaPar(edgeList, n, m);
+	vector<edge> mstp = MinimumSpanningTreeBoruvkaPar(edgeList, n, m);
+	vector<edge> msts = MinimumSpanningTreeBoruvkaPar(edgeList, n, m);
+	int pw = 0;
+	int sw = 0;
+	assert(mstp.size() == msts.size());
+	for(int i = 0; i < mstp.size(); i++){
+		pw += mstp[i].weight;
+		sw += msts[i].weight;
+	}
+
+	
 	
 
 

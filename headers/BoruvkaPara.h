@@ -14,16 +14,11 @@
 
 
 void BoruvkaStepPar(set<edge>& mst, vector<edge>& edgelist, UnionFind UF, int n){
-<<<<<<< HEAD
-    vector<edge> BestOutgoingEdges(n); // safe the best edges for each supervertex this round
-	
-=======
     vector<edge> BestOutgoingEdges(n); 
 	omp_set_num_threads(100);
 
->>>>>>> 9a4e73a23510589818b1d425dae716aa5389c5a4
 
-
+#pragma omp parallel for ordered
 	for (int i = 0; i < edgelist.size(); i++) { // loop through all edges and find the current best edges
 		edge e = edgelist[i];
 		int superSource = UF.find(e.source);
@@ -42,17 +37,15 @@ void BoruvkaStepPar(set<edge>& mst, vector<edge>& edgelist, UnionFind UF, int n)
 #pragma omp parallel for ordered
 	for (int i = 0; i < n; i++) {
 		if (BestOutgoingEdges[i].weight != 0) {
-			mst.insert(BestOutgoingEdges[i]);
 			UF.merge(BestOutgoingEdges[i].source, BestOutgoingEdges[i].dest);
+			#pragma omp ordered
+			{
+				mst.insert(BestOutgoingEdges[i]);
+			}
 		}
 	}
-<<<<<<< HEAD
-	//std::cout << "Checkpoint: contraction done"; nn;
- 
-=======
 
 
->>>>>>> 9a4e73a23510589818b1d425dae716aa5389c5a4
 
 }
 
