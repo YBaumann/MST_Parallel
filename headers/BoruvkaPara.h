@@ -15,10 +15,10 @@
 #define nn std::cout << "\n"
 
 // Design variables
-	int numThreads = 32;
+	int numThreads = 3;
 
 
-void BoruvkaStepPar(vector<edge> edgelist, vector<edge> &mst, int n, int m)
+void BoruvkaStepPar(vector<edge> edgelist, vector<edge> &mst, int &n, int &m)
 {
 	// Divide Workload
 	int workloadPerProcessor = 2 * m / numThreads;
@@ -109,37 +109,24 @@ void BoruvkaStepPar(vector<edge> edgelist, vector<edge> &mst, int n, int m)
 	// in order for all vertices to find their final parent -> this will be a runtime problem, if we dont adjust certain
 	// details!!! 
 
-	bool notFinished = 1;
-	while(notFinished){
-		notFinished = 0;
-		#pragma omp parallel for
+
+	// parallelize this!
+
+	int notFinished = 100;
+	while(notFinished--){
 		for(int i = 0; i < n; i++){
 			if(ParentVertex[i] > ParentVertex[best[i].dest]){
 				ParentVertex[i] = ParentVertex[best[i].dest];
 			}
-			if(ParentVertex[i] != ParentVertex[ParentVertex[i]]){
-				notFinished = 1;
+			if(ParentVertex[best[i].dest] > ParentVertex[i]){
+				ParentVertex[best[i].dest] = ParentVertex[i];
 			}
 		}
 	}
 
 	// now we have a finished LookUpTable for parent vertices
 	// as a next step we create the new edgeList
-	int sizeEdgeList = 0;
-	vector<edge> returningEdgeList;
 	
-	for(int i = 0; i< m; i++){
-		if(ParentVertex[edgelist[i].source] != ParentVertex[edgelist[i].dest]){
-			returningEdgeList.push_back(edgelist[i]);
-		}
-		if(i < n && best[i].source < best[i].dest){
-			mst.push_back(best[i]);
-		}
-	}
-
-
-	
-	edgelist = returningEdgeList;
 
 	
 }
@@ -152,13 +139,14 @@ vector<edge> MinimumSpanningTreeBoruvkaPar(vector<edge> edgelist, int n, int m)
 	vector<edge> mst;
 
 	// form MST
-
-	while (mst.size() < n-1)
+	int msShould = n;
+	int t = 1;
+	while (n > 1)
 	{
+		
 		BoruvkaStepPar(edgelist, mst, n, m);
-		std::cout << mst.size()<< " " << n <<  "\n";
+		//std::cout << mst.size()<< " here " << n <<  "\n";
 	}
-	std::cout << "\n";
 
 	return mst;
 }
