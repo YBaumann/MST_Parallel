@@ -37,8 +37,17 @@ int main() {
  
 	
 	vector<edge> mstp = MinimumSpanningTreeBoruvkaPar(edgeList, n, m);
+	//vector<edge> msts = MinimumSpanningTreeBoruvkaSeq(edgeList, n, m);
 
-	
+	int pw = 0;
+	int sw = 0;
+
+
+	for(int i = 0; i < mstp.size(); i++){
+		//pw += mstp[i].weight;
+		sw += mstp[i].weight;
+	}
+	std::cout << pw << ' ' << sw;
 	
 
 

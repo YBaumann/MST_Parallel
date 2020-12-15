@@ -8,6 +8,13 @@ Work-Log
 
 ---------
 
+15/12/20
+The parallelization was wrong. I am currently working on a correct parallelization.
+Edge contraction is the biggest problem.
+The algorithm is not correct yet, I suspect that n and m are the problem and that I need to adjust them.
+
+---------
+
 26/11/20
 I parallelized the single loop in Boruvkastep without any careful adjustements.
 I ran a simple test and took the mean runtime, this to my surprise I got a nice speedup for parallel implementation.

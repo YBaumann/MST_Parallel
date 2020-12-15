@@ -18,12 +18,19 @@
 	int numThreads = 32;
 
 
-void BoruvkaStepPar(vector<vector<edge>> &adjArr, vector<edge> &mst, int n, int m)
+void BoruvkaStepPar(vector<edge> edgelist, vector<edge> &mst, int n, int m)
 {
 	// Divide Workload
 	int workloadPerProcessor = 2 * m / numThreads;
 	int workloadLastProcessor = 2 * m - ((numThreads - 1) * workloadPerProcessor);
+
+	//Datastructures
+	//create adjacency array --> can be parallelized?!
+	vector<vector<edge>> adjArr = edgeListToAdjArray(edgelist, n);
 	vector<int> prefix(n);
+	vector<edge> best(n);
+	vector<int> ParentVertex(n);
+	for(int i = 0; i< n; i++){ParentVertex[i] = i;}
 	prefixParallel(prefix, adjArr);
 
 // now comes parallel part
@@ -43,13 +50,15 @@ void BoruvkaStepPar(vector<vector<edge>> &adjArr, vector<edge> &mst, int n, int 
 		int startidx = binSearchlow(prefix, startWL);
 		vector<edge> localEdgeList;
 		int edgeidx = prefix[startidx];
+		int endidx = startidx;
 
 		for(int i = startidx; i < adjArr.size(); i++){
 			for(int j = 0; j < adjArr[i].size(); j++){
 				if(edgeidx >= startWL && edgeidx < endWL){
 					localEdgeList.push_back(adjArr[i][j]);
 				}
-				if(edgeidx > endWL){
+				if(edgeidx >= endWL){
+					endidx = i;
 					goto finished;
 				}
 				edgeidx++;
@@ -57,8 +66,82 @@ void BoruvkaStepPar(vector<vector<edge>> &adjArr, vector<edge> &mst, int n, int 
 		}
 
 		finished:
-		std::cout << localEdgeList.size() << " " << endWL << "\n";
+		// now each thread has its own local edgelist ready
+		// next step is, that each thread proposes a best edge for all vertices it looks at
+		// if a processor has a best edge for a vertex that is neither start nor end, then it can write it to bestedges regardless
+		vector<edge> proposalStartEnd(2); // first entry is proposal for start, second entry is proposal for end
+		for(auto e : localEdgeList){
+			if(e.source == startidx){ // proposal list
+				if(proposalStartEnd[0].weight == 0 || (proposalStartEnd[0].weight > e.weight)){
+					proposalStartEnd[0] = e;
+				}
+			}
+			if(e.source == endidx){
+				if(proposalStartEnd[1].weight == 0 || (proposalStartEnd[1].weight > e.weight)){
+					proposalStartEnd[1] = e;
+				}
+			}
+			if(e.source != endidx && e.source != startidx){
+				if(best[e.source].weight == 0 || (best[e.source].weight > e.weight)){
+					best[e.source] = e;
+					ParentVertex[e.source] = min(e.source,e.dest); // do we need ParentVertex here?
+					ParentVertex[e.dest] = min(e.source,e.dest);
+				}
+			}
+		}
+
+		// now we compare all vertices, where concurrency control is necessary
+		#pragma omp ordered
+		{
+			if(best[startidx].weight == 0 || (best[startidx].weight > proposalStartEnd[0].weight)){
+				best[startidx] = proposalStartEnd[0];
+				ParentVertex[startidx] = min(proposalStartEnd[0].source,proposalStartEnd[0].dest);
+			}
+			if(best[endidx].weight == 0 || best[endidx].weight > proposalStartEnd[1].weight){
+				best[endidx] = proposalStartEnd[1];
+				ParentVertex[endidx] = min(proposalStartEnd[1].source,proposalStartEnd[1].dest);
+			}
+		}
+		
 	}
+
+	// next step is to contract all edges, this is done by a lookup table, where we do max log n steps
+	// in order for all vertices to find their final parent -> this will be a runtime problem, if we dont adjust certain
+	// details!!! 
+
+	bool notFinished = 1;
+	while(notFinished){
+		notFinished = 0;
+		#pragma omp parallel for
+		for(int i = 0; i < n; i++){
+			if(ParentVertex[i] > ParentVertex[best[i].dest]){
+				ParentVertex[i] = ParentVertex[best[i].dest];
+			}
+			if(ParentVertex[i] != ParentVertex[ParentVertex[i]]){
+				notFinished = 1;
+			}
+		}
+	}
+
+	// now we have a finished LookUpTable for parent vertices
+	// as a next step we create the new edgeList
+	int sizeEdgeList = 0;
+	vector<edge> returningEdgeList;
+	
+	for(int i = 0; i< m; i++){
+		if(ParentVertex[edgelist[i].source] != ParentVertex[edgelist[i].dest]){
+			returningEdgeList.push_back(edgelist[i]);
+		}
+		if(i < n && best[i].source < best[i].dest){
+			mst.push_back(best[i]);
+		}
+	}
+
+
+	
+	edgelist = returningEdgeList;
+
+	
 }
 
 vector<edge> MinimumSpanningTreeBoruvkaPar(vector<edge> edgelist, int n, int m)
@@ -68,16 +151,14 @@ vector<edge> MinimumSpanningTreeBoruvkaPar(vector<edge> edgelist, int n, int m)
 	// Actual Code
 	vector<edge> mst;
 
-	//create adjacency array --> can be parallelized
-	vector<vector<edge>> adjArr = edgeListToAdjArray(edgelist, n);
-
 	// form MST
 
-	int t = 1;
-	while (t--)
+	while (mst.size() < n-1)
 	{
-		BoruvkaStepPar(adjArr, mst, n, m);
+		BoruvkaStepPar(edgelist, mst, n, m);
+		std::cout << mst.size()<< " " << n <<  "\n";
 	}
+	std::cout << "\n";
 
 	return mst;
 }
