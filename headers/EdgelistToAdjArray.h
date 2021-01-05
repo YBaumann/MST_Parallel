@@ -15,7 +15,7 @@ vector<vector<edge>> edgeListToAdjArray(vector<edge> edgelist, int n)
         int source = e.source;
         int dest = e.dest;
         result[source].push_back(e);
-        edge f; f.source = dest; f.dest = source;
+        edge f; f.source = dest; f.dest = source; f.weight = e.weight; f.idx = e.idx;
         result[dest].push_back(f);
     }
 
