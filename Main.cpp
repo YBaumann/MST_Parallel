@@ -34,12 +34,27 @@ int main() {
 		f >> e.source >> e.dest >> e.weight;
 		edgeList.push_back(e);
 	}
-	vector<edge> edgel = edgeList;
+	vector<edge> edgel1 = edgeList;
+	vector<edge> edgel2 = edgeList;
 	
-	vector<edge> mstp = MinimumSpanningTreeBoruvkaPar(edgel, n, m);
+	vector<edge> mstp = MinimumSpanningTreeBoruvkaPar(edgel1, n, m);
+	vector<edge> mstw;// = MinimumSpanningTreeKruskalSeq(edgel2, n ,m);
+	nn;
 
 	int pw = 0;
 	int sw = 0;	
+
+	for(auto e : mstp){
+		pw += e.weight;
+		//std::cout << e.weight << ' ';
+	}
+	nn;
+	for(auto e : mstw){
+		sw += e.weight;
+		//std::cout << e.weight << ' ';
+	
+
+	}
 
 
 

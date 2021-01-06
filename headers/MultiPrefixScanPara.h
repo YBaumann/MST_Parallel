@@ -37,8 +37,8 @@ void doScan(vector<vector<edge>> &ArrOfLists, vector<int> &sizes){
     int jDist = 1;
 
     while(jDist < n){
-        
-        for(int i = 0; i + jDist < n; i += 2*jDist){
+        #pragma omp parallel for
+        for(int i = 0; i < n - jDist; i += 2*jDist){
             merge(ArrOfLists[i], i, ArrOfLists[i + jDist], i+jDist, sizes);
         }
         jDist *= 2;

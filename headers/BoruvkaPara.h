@@ -17,10 +17,10 @@
 #define nn std::cout << "\n"
 
 // Design variables
-	int numThreads = 6;
+	int numThreads = 12;
 
 
-void BoruvkaStepPar(vector<edge> edgelist, vector<edge> &mst, int &n, int m)
+void BoruvkaStepPar(vector<edge> edgelist, set<int> &mst, int &n, int m)
 {
 	std::cout << "Checkpoint 1 ";
 	// Divide Workload
@@ -90,8 +90,6 @@ void BoruvkaStepPar(vector<edge> edgelist, vector<edge> &mst, int &n, int m)
 			if(e.source != endidx && e.source != startidx){
 				if(best[e.source].weight == 0 || (best[e.source].weight > e.weight)){
 					best[e.source] = e;
-					ParentVertex[e.source] = min(e.source,e.dest); // do we need ParentVertex here?
-					ParentVertex[e.dest] = min(e.source,e.dest);
 				}
 			}
 			
@@ -100,33 +98,40 @@ void BoruvkaStepPar(vector<edge> edgelist, vector<edge> &mst, int &n, int m)
 		PrefixScanVector[2*Tid] = proposalStartEnd[0];
 		PrefixScanVector[2*Tid+1] = proposalStartEnd[1];
 	}
-	std::cout << "Checkpoint 2 ";
+	std::cout << "Checkpoint 2 \n";
 	// now do multiprefix scan
-
-	for(int i = 0; i < PrefixScanVector.size(); i++){
-		std::cout << PrefixScanVector[i].weight << " ";
-	}
 
 	int differentEdges = 0;
 	multiPrefixScan(PrefixScanVector, differentEdges);
 
-	for(int i = 0; i < differentEdges; i++){
-		std::cout << PrefixScanVector[i].weight;nn;
-	}
-
-	std::cout << "works";
 	// now insert found edges in parallel, we marked edges that we do not insert with weight = -1 
+	// The first differentEdges entries of PrefixScanVec hold the edges we need
 
+	#pragma omp parallel for
+	for(int i = 0; i < differentEdges; i++){
+		best[PrefixScanVector[i].source] = PrefixScanVector[i];
+	}
 
 	// next step is to contract all edges, this is done by a lookup table, where we do max log n steps
 	// in order for all vertices to find their final parent -> this will be a runtime problem, if we dont adjust certain
 	// details!!! 
 
-	// findParents(ParentVertex, best);
+	findParents(ParentVertex, best);
 
 	// now we have a finished LookUpTable for parent vertices
 	// as a next step we create the new edgeList
+
+	// We loop thorugh the full edgelist and adjust the vertex indices
 	
+	for(int i = 0; i < edgelist.size(); i++){
+		edgelist[i].source = ParentVertex[edgelist[i].source];
+		edgelist[i].dest = ParentVertex[edgelist[i].dest];
+	}
+
+	for(auto e : best){
+		mst.insert(e.idx);
+	}
+
 
 	
 }
@@ -134,19 +139,26 @@ void BoruvkaStepPar(vector<edge> edgelist, vector<edge> &mst, int &n, int m)
 vector<edge> MinimumSpanningTreeBoruvkaPar(vector<edge> edgelist, int n, int m)
 {
 	omp_set_num_threads(numThreads);
-
+	vector<edge> edgelistCopy = edgelist;
 	// Actual Code
-	vector<edge> mst;
+	set<int> mst;
 	std::cout << m << ' ';
 	// form MST
 	int msShould = n;
 	int t = 1;
-	while (t--)
+	while (mst.size() < n-1)
 	{
 		
 		BoruvkaStepPar(edgelist, mst, n, m);
-		//std::cout << mst.size()<< " here " << n <<  "\n";
+		std::cout << mst.size() << ' ';
 	}
 
-	return mst;
+	vector<edge> mst_res;
+
+	for(auto e : mst){
+		mst_res.push_back(edgelistCopy[e]);
+	}
+
+
+	return mst_res;
 }

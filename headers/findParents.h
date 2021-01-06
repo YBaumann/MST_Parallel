@@ -1,30 +1,23 @@
 
-
-int ParentStep(vector<int> ParentVertex, vector<edge> best){
-    int notFinished = 0;
-    int n = ParentVertex.size();
-    #pragma omp parallel for ordered
-    for(int i = 0; i < n; i++){
-        int currParent = ParentVertex[i];
-        int PoP = ParentVertex[best[i].dest]; // Parent of Parent
-        if(PoP){
-
-        }
-
-    }
-
-
-    return 0;
-
-}
-
-
 // The goal of this function is, to determine the final parent of all vertices in parallel
-// we aim for a asymptotic complexity of O(n/p * log(n))
+// we aim for a asymptotic complexity of O(n/p * log(n)) -> can this be improved?
 
-void findParents(vector<int> ParentVertex, vector<edge> best){
-    int notFinished = 1;
-    while(notFinished){
-        notFinished = ParentStep(ParentVertex, best);
+#include <math.h>
+
+void findParents(vector<int> &ParentVertex, vector<edge> best){
+    bool notFinished = true;
+    for(int i = 0; i < std::log(best.size()) + 1; i++){
+        
+        #pragma omp parallel for
+        for(int j = 0; j < best.size(); j++){
+            edge e1 = best[j];
+            if(ParentVertex[e1.dest] > ParentVertex[ParentVertex[e1.source]]){
+                ParentVertex[e1.dest] = ParentVertex[ParentVertex[e1.source]];
+            }
+            if(ParentVertex[e1.source] > ParentVertex[ParentVertex[e1.dest]]){
+                ParentVertex[e1.source] = ParentVertex[ParentVertex[e1.dest]];
+            }
+            
+        }
     }
 }
