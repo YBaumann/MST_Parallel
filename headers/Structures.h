@@ -63,7 +63,7 @@ public:
 	void merge(int x, int y) {
 		int i = find(x); int j = find(y); if (i == j) return;
 		// make smaller root point to larger one
-		if (sz[i] < sz[j]) { id[i] = j, sz[j] += sz[i]; }
+		if (i > j) { id[i] = j, sz[j] += sz[i]; }
 		else { id[j] = i, sz[i] += sz[j]; }
 		cnt--;
 	}

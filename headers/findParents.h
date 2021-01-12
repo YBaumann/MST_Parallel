@@ -5,17 +5,20 @@
 #include <math.h>
 
 void findParents(vector<int> &ParentVertex, vector<edge> best){
-    bool notFinished = true;
-    for(int i = 0; i < std::log(best.size()) + 1; i++){
-        
-        #pragma omp parallel for
+    for(int i = 0; i < 100; i++){
         for(int j = 0; j < best.size(); j++){
             edge e1 = best[j];
             if(ParentVertex[e1.dest] > ParentVertex[ParentVertex[e1.source]]){
                 ParentVertex[e1.dest] = ParentVertex[ParentVertex[e1.source]];
             }
+            if(ParentVertex[e1.dest] > ParentVertex[ParentVertex[e1.dest]]){
+                ParentVertex[e1.dest] = ParentVertex[ParentVertex[e1.dest]];
+            }
             if(ParentVertex[e1.source] > ParentVertex[ParentVertex[e1.dest]]){
                 ParentVertex[e1.source] = ParentVertex[ParentVertex[e1.dest]];
+            }
+            if(ParentVertex[e1.source] > ParentVertex[ParentVertex[e1.source]]){
+                ParentVertex[e1.source] = ParentVertex[ParentVertex[e1.source]];
             }
             
         }

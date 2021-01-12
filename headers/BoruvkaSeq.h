@@ -56,10 +56,27 @@ vector<edge> MinimumSpanningTreeBoruvkaSeq(vector<edge> edgelist, int n, int m) 
 	while (mst.size() < n - 1) { // while we dont have a full tree
 		BoruvkaStepSeq(mst, edgelist, UF, n); // do one step
 		rounds++;
-		//std::cout << "We have done " << rounds << " Boruvka steps"; nn;
+		
+		double currentW = 0;
+		for(auto e : mst){
+			currentW += e.weight;
+		}
+		set<int> remPar;
+		// Check remaining parents
+		for(int k = 0; k < n; k++){
+			remPar.insert(UF.find(k));
+		}
+		for(auto e : remPar){
+			//std::cout << e << ' ';
+		}
+		nn;
+		
+		std::cout << "Current Weight of Seq Mst is: " << currentW << "\n";
+		std::cout << "Current Size of MST is: " << mst.size() << "\n";
+
 		assert(last_round_size < mst.size() && "Size has not increased in this round!");
 		last_round_size = mst.size();
-		//std::cout << mst.size(); nn;
+		
 	}
 
 	vector<edge> result;
@@ -67,7 +84,7 @@ vector<edge> MinimumSpanningTreeBoruvkaSeq(vector<edge> edgelist, int n, int m) 
 		result.push_back(e);
 	}
 
-
+	nn;
 
 	return result;
 }
