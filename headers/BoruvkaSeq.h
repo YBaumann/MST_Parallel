@@ -22,6 +22,7 @@ void BoruvkaStepSeq(set<edge>& mst, vector<edge>& edgelist, UnionFind UF, int n)
 		edge e = edgelist[i];
 		int superSource = UF.find(e.source);
 		int superDest = UF.find(e.dest);
+		
 		if (superSource != superDest) { // belong to different supervertices
 			if (e.weight < BestOutgoingEdges[superSource].weight || BestOutgoingEdges[superSource].weight == 0) { // check if its a best edge for source and replace
 				BestOutgoingEdges[superSource] = e;
@@ -33,7 +34,6 @@ void BoruvkaStepSeq(set<edge>& mst, vector<edge>& edgelist, UnionFind UF, int n)
 
 	}
 
-	//std::cout << "Checkpoint finding best edges of round done!"; nn;
 
 	for (int i = 0; i < n; i++) {
 		if (BestOutgoingEdges[i].weight != 0) {
@@ -49,42 +49,14 @@ vector<edge> MinimumSpanningTreeBoruvkaSeq(vector<edge> edgelist, int n, int m) 
 	set<edge> mst; // edgelist of final MST
 	UnionFind UF(n);
 
-	//std::cout << "Checkpoint Unionfind created"; nn;
-
-	int rounds = 0;
-	int last_round_size = mst.size();
 	while (mst.size() < n - 1) { // while we dont have a full tree
 		BoruvkaStepSeq(mst, edgelist, UF, n); // do one step
-		rounds++;
-		
-		double currentW = 0;
-		for(auto e : mst){
-			currentW += e.weight;
-		}
-		set<int> remPar;
-		// Check remaining parents
-		for(int k = 0; k < n; k++){
-			remPar.insert(UF.find(k));
-		}
-		for(auto e : remPar){
-			//std::cout << e << ' ';
-		}
-		nn;
-		
-		std::cout << "Current Weight of Seq Mst is: " << currentW << "\n";
-		std::cout << "Current Size of MST is: " << mst.size() << "\n";
-
-		assert(last_round_size < mst.size() && "Size has not increased in this round!");
-		last_round_size = mst.size();
-		
 	}
 
 	vector<edge> result;
 	for (auto e : mst) {
 		result.push_back(e);
 	}
-
-	nn;
 
 	return result;
 }

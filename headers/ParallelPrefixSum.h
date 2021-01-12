@@ -1,5 +1,5 @@
 
-void prefixParallel(vector<int> &prefix, vector<vector<edge>> adjArr){
+void prefixSeq(vector<int> &prefix, vector<vector<edge>> adjArr){
     // We can parallelize this later
     prefix[0] = 0;
     for(int i = 1; i < adjArr.size(); i++){

@@ -18,7 +18,7 @@ we search for smallest value
 */
 
 void merge(vector<edge> &list1, int idx1, vector<edge> &list2, int idx2, vector<int> &sizes){
-    
+    // Runs in O(p)
     if(list1[sizes[idx1]-1].source == list2[0].source){
         list1[sizes[idx1]-1] = list1[sizes[idx1]-1].weight <= list2[0].weight ? list1[sizes[idx1]-1] : list2[0];
         for(int i = 1; i < sizes[idx2]; i++){

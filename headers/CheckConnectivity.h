@@ -1,17 +1,5 @@
 #pragma once
-#include <stdlib.h>
-#include <cstdio>
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <unordered_set>
-#include <set>
-#include <algorithm>
-#include <cassert>
 #include <queue>
-
-
-#define nn std::cout << "\n"
 
 // we do a simple BFS to check connectivity!
 
