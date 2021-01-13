@@ -9,6 +9,7 @@
 #include <cassert>
 #include <omp.h>
 #include <chrono>
+
 #include "headers\Structures.h"
 #include "headers\EdgelistToAdjArray.h"
 #include "headers\BoruvkaSeq.h"
@@ -16,6 +17,7 @@
 #include "headers\CheckConnectivity.h"
 #include "headers\PrimSeq.h" 
 #include "headers\BoruvkaPara.h"
+#include "headers\TestCases.h"
 
 // We want the output to be an edgelist with edgeids, sorted
 
@@ -36,9 +38,11 @@ int main() {
 	}
 	vector<edge> edgel1 = edgeList;
 	vector<edge> edgel2 = edgeList;
-	
+
+	int numThreads = 32;
+	/*
 	vector<edge> msts = MinimumSpanningTreeBoruvkaSeq(edgel1, n, m);
-	vector<edge> mstp = MinimumSpanningTreeBoruvkaPar(edgel2, n, m);
+	vector<edge> mstp = MinimumSpanningTreeBoruvkaPar(edgel2, n, m, numThreads);
 	
 	double pw = 0;
 	double sw = 0;
@@ -53,7 +57,8 @@ int main() {
 	}
 	std::cout << "Calculated weight Sequential: " << sw << "\n";
 
-
+*/
+	runAllTests();
 
 
 

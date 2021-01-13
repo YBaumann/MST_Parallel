@@ -8,11 +8,7 @@
 
 #define nn std::cout << "\n"
 
-// Design variables
-	int numThreads = 32; // behaves strangely, if > n
-
-
-void BoruvkaStepPar(vector<edge> &edgelist, vector<int> &ParentVertex, set<int> &mst, int &n, int m, int totalN)
+void BoruvkaStepPar(vector<edge> &edgelist, vector<int> &ParentVertex, set<int> &mst, int &n, int m, int totalN, int numThreads)
 {
 	// Divide Workload per processor
 	int workloadPerProcessor = 2 * m / numThreads;
@@ -127,7 +123,7 @@ void BoruvkaStepPar(vector<edge> &edgelist, vector<int> &ParentVertex, set<int> 
 	
 }
 
-vector<edge> MinimumSpanningTreeBoruvkaPar(vector<edge> edgelist, int n, int m){
+vector<edge> MinimumSpanningTreeBoruvkaPar(vector<edge> edgelist, int n, int m, int numThreads){
 	
 	// OMP Design
 	assert(numThreads < n && "behaves strangely if more processors than nodes!");
@@ -147,7 +143,7 @@ vector<edge> MinimumSpanningTreeBoruvkaPar(vector<edge> edgelist, int n, int m){
 
 	// Steps until only one vertex remains <-> Mst has size n-1
 	while (n > 1){
-		BoruvkaStepPar(edgelistCopy, ParentVertex, mst, n, m, totalN);
+		BoruvkaStepPar(edgelistCopy, ParentVertex, mst, n, m, totalN, numThreads);
 	}
 
 	vector<edge> mst_res(totalN-1);
