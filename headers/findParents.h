@@ -4,23 +4,27 @@
 
 #include <math.h>
 
-void findParents(vector<int> &ParentVertex, vector<edge> best){
-    for(int i = 0; i < 100; i++){
-        for(int j = 0; j < best.size(); j++){
-            edge e1 = best[j];
-            if(ParentVertex[e1.dest] > ParentVertex[ParentVertex[e1.source]]){
-                ParentVertex[e1.dest] = ParentVertex[ParentVertex[e1.source]];
+// Improved Pointerjumping
+
+void findParents1(vector<int> &ParentVertex, vector<edge> best, int &n){
+    n = 0;
+
+    // We need to have consensus on n!, this has O(n) timesteps
+    #pragma omp parallel for ordered
+    for(int i = 0; i < best.size(); i++){
+        if(best[best[i].dest].dest == i && i < best[i].dest){
+            best[i].dest = i;
+            #pragma omp ordered
+            {
+                n++;
             }
-            if(ParentVertex[e1.dest] > ParentVertex[ParentVertex[e1.dest]]){
-                ParentVertex[e1.dest] = ParentVertex[ParentVertex[e1.dest]];
-            }
-            if(ParentVertex[e1.source] > ParentVertex[ParentVertex[e1.dest]]){
-                ParentVertex[e1.source] = ParentVertex[ParentVertex[e1.dest]];
-            }
-            if(ParentVertex[e1.source] > ParentVertex[ParentVertex[e1.source]]){
-                ParentVertex[e1.source] = ParentVertex[ParentVertex[e1.source]];
-            }
-            
+        }
+    }
+
+    for(int it = 0; it < std::log(best.size()) + 10; it++){
+        #pragma omp parallel for
+        for(int i = 0; i < ParentVertex.size(); i++){
+            ParentVertex[i] = ParentVertex[best[i].dest];
         }
     }
 }

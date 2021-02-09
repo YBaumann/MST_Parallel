@@ -49,8 +49,17 @@ vector<edge> MinimumSpanningTreeBoruvkaSeq(vector<edge> edgelist, int n, int m) 
 	set<edge> mst; // edgelist of final MST
 	UnionFind UF(n);
 
+	int StepNr = 1;
 	while (mst.size() < n - 1) { // while we dont have a full tree
+		// auto S1 = std::chrono::high_resolution_clock::now();
 		BoruvkaStepSeq(mst, edgelist, UF, n); // do one step
+    	// auto S2 = std::chrono::high_resolution_clock::now();
+
+    	// auto durationSeq = std::chrono::duration_cast<std::chrono::microseconds>( S2 - S1 ).count();
+		// std::cout << "Stepnr: " << StepNr++ << " for Seq Implementation took " << durationSeq / 1000000.0<< " sec";nn;
+
+		
+		//std::cout << mst.size() << " ";
 	}
 
 	vector<edge> result;

@@ -1,16 +1,29 @@
-25.11 
-This is not a conclusive test!
-I tested The Code of Boruvka parallel vs sequential. I have not optimized anything for cachehitrate.
-I ran the function 100 times and took the mean for every level of optimization.
+09 / 02
+We tested The first working parallel Implementation and got the following times:
+Par = 4.6948s
+Seq = 0.291398
 
-Avg Time for Boruvka Parallel: 32 threads, 100K Vertices 6M edges
-660'908 microseconds no optimization
-314'733 O1 optimization
-305'053 O2 optimization
+Next we will check what part of the parallel implementation takes the most time:
+Here are the timestamps for each Boruvkastep in parallel:
+Stepnr: 1 took 1.50594 sec
+Stepnr: 2 took 1.10605 sec
+Stepnr: 3 took 0.824964 sec
+Stepnr: 4 took 0.616495 sec
+Stepnr: 5 took 0.569029 sec
 
+In Comparison Sequential:
+Stepnr: 1 for Seq Implementation took 0.059304 sec
+Stepnr: 2 for Seq Implementation took 0.066826 sec
+Stepnr: 3 for Seq Implementation took 0.045707 sec
+Stepnr: 4 for Seq Implementation took 0.044192 sec
+Stepnr: 5 for Seq Implementation took 0.047723 sec
 
-Avg Time for Boruvka Seq: 100K Vertices, 6M edges
-1'385'360 microseconds no optimization
-395'562 O1 optimization
-400'094 O2 optimization
+Each step has some part that takes really long. I suspect it to be the edgelist to adjarray conversion.
+Here are the times for each conversion in a step
+Time: 0.445923 sec
+Time: 0.261265 sec
+Time: 0.206302 sec
+Time: 0.21638 sec
+Time: 0.25962 sec
 
+This makes up 1.37s approximately 30% of the time taken. WHat other factors take long?

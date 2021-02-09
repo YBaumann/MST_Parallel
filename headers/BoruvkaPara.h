@@ -6,7 +6,8 @@
 #include "MultiPrefixScanPara.h"
 #include "EdgeListUpdateParallel.h"
 
-#define nn std::cout << "\n"
+
+
 
 void BoruvkaStepPar(vector<edge> &edgelist, vector<int> &ParentVertex, set<int> &mst, int &n, int m, int totalN, int numThreads)
 {
@@ -15,15 +16,15 @@ void BoruvkaStepPar(vector<edge> &edgelist, vector<int> &ParentVertex, set<int> 
 	int workloadLastProcessor = 2 * m - ((numThreads - 1) * workloadPerProcessor);
 
 	//Datastructures
-	//create adjacency array --> can be parallelized?!
-	vector<vector<edge>> adjArr = edgeListToAdjArray(edgelist, n, totalN); // Parallelize TODO
 	vector<int> prefix(totalN); // assumed to be empty
 	vector<edge> best(totalN);
 	vector<edge> PrefixScanVector(2*numThreads);
-	prefixSeq(prefix, adjArr); // Parallelize TODO
 
-
-	
+	startTimer;
+	vector<vector<edge>> adjArr = edgeListToAdjArray(edgelist, n, totalN);
+	prefixSeq(prefix, adjArr); 
+	endTimer;
+	//printTime;
 // now comes parallel part
 #pragma omp parallel for ordered
 	for (int tr = 0; tr < numThreads; tr++)
@@ -87,6 +88,8 @@ void BoruvkaStepPar(vector<edge> &edgelist, vector<int> &ParentVertex, set<int> 
 		PrefixScanVector[2*Tid+1] = proposalStartEnd[1];
 	}
 	
+    
+	
 	// now do multiprefix scan
 	int differentEdges = 0;
 	multiPrefixScan(PrefixScanVector, differentEdges);
@@ -97,29 +100,27 @@ void BoruvkaStepPar(vector<edge> &edgelist, vector<int> &ParentVertex, set<int> 
 	#pragma omp parallel for
 	for(int i = 0; i < differentEdges; i++){
 		best[PrefixScanVector[i].source] = PrefixScanVector[i];
-		//std::cout << PrefixScanVector[i].source << ' ';
 	}
 
 	// next step is to contract all edges, this is done by a lookup table, where we do max log n steps
 	// in order for all vertices to find their final parent -> this will be a runtime problem, if we dont adjust certain
 	// details!!! 
 
-	findParents(ParentVertex, best);
+	
+	findParents1(ParentVertex, best, n);
 
 	// now we have a finished LookUpTable for parent vertices
 	// as a next step we create the new edgeList
 
 	// We loop thorugh the full edgelist and adjust the vertex indices
-
-	UpdateEdgelist(edgelist, ParentVertex, n);
 	
-
+	
+	UpdateEdgelist(edgelist, ParentVertex);
+	
 	for(auto e : best){
 		if(e.weight > 0)
 			mst.insert(e.idx);
 	}
-
-
 	
 }
 
@@ -138,13 +139,18 @@ vector<edge> MinimumSpanningTreeBoruvkaPar(vector<edge> edgelist, int n, int m, 
 
 	// Create ParentVertices to signal, to which Super Vertex we belong
 	vector<int> ParentVertex(totalN);
+	#pragma omp parallel for
 	for(int i = 0; i< totalN; i++){ParentVertex[i] = i;}
 
-
+	int StepNr = 1;
 	// Steps until only one vertex remains <-> Mst has size n-1
 	while (n > 1){
+
+		startTimer;
 		BoruvkaStepPar(edgelistCopy, ParentVertex, mst, n, m, totalN, numThreads);
-	}
+    	endTimer;
+		//printTime;
+		}
 
 	vector<edge> mst_res(totalN-1);
 

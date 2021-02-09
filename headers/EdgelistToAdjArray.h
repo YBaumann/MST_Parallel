@@ -1,26 +1,27 @@
-#pragma once
+#define startTimer auto t1 = std::chrono::high_resolution_clock::now()
+#define endTimer auto t2 = std::chrono::high_resolution_clock::now()
+#define printTime auto durationSeq = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count(); std::cout << "Time: " << durationSeq / 1000000.0<< " sec\n"
+#define nn std::cout << "\n"
 
 vector<vector<edge>> edgeListToAdjArray(vector<edge> &edgelist, int n, int totalN)
 {
     // initialize adjacency Vector
-    vector<vector<edge>> result;
-    for(int i = 0; i < totalN; i++){
-        vector<edge> f;
-        result.push_back(f);
-    }
+    startTimer;
+    vector<vector<edge>> result(totalN);
+    endTimer;
+    printTime;
 
     // convert edgelist to adjarr
     // we rewrite edges, such that source dest matches
-    for(edge e : edgelist){
-        int source = e.source;
-        int dest = e.dest;
-        result[source].push_back(e);
-        edge f; 
-        f.source = dest; 
-        f.dest = source; 
+    for(int i = 0; i < edgelist.size(); i++){
+        edge e = edgelist[i];
+        edge f;
+        result[e.source].push_back(e); 
+        f.source = e.dest; 
+        f.dest = e.source; 
         f.weight = e.weight; 
         f.idx = e.idx;
-        result[dest].push_back(f);
+        result[e.dest].push_back(f);
     }
 
     return result;
