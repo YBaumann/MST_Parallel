@@ -6,7 +6,7 @@
 #include "MultiPrefixScanPara.h"
 #include "EdgeListUpdateParallel.h"
 
-
+auto TotalTime = 0;
 
 
 void BoruvkaStepPar(vector<edge> &edgelist, vector<int> &ParentVertex, set<int> &mst, int &n, int m, int totalN, int numThreads)
@@ -25,6 +25,8 @@ void BoruvkaStepPar(vector<edge> &edgelist, vector<int> &ParentVertex, set<int> 
 	prefixSeq(prefix, adjArr); 
 	endTimer;
 	//printTime;
+	
+
 // now comes parallel part
 #pragma omp parallel for ordered
 	for (int tr = 0; tr < numThreads; tr++)
@@ -44,8 +46,10 @@ void BoruvkaStepPar(vector<edge> &edgelist, vector<int> &ParentVertex, set<int> 
 		vector<edge> localEdgeList;
 		int edgeidx = prefix[startidx];
 		int endidx = startidx;
-		for(int i = startidx; i < adjArr.size(); i++){
-			for(int j = 0; j < adjArr[i].size(); j++){
+		int Asize = adjArr.size();
+		for(int i = startidx; i < Asize; i++){
+			int AsizeI = adjArr[i].size();
+			for(int j = 0; j < AsizeI; j++){
 				if(edgeidx >= startWL && edgeidx < endWL){
 					localEdgeList.push_back(adjArr[i][j]);
 				}
@@ -117,10 +121,14 @@ void BoruvkaStepPar(vector<edge> &edgelist, vector<int> &ParentVertex, set<int> 
 	
 	UpdateEdgelist(edgelist, ParentVertex);
 	
-	for(auto e : best){
-		if(e.weight > 0)
-			mst.insert(e.idx);
+
+	// We can parallelize this
+	for(int i = 0; i < totalN; i++){
+		if(best[i].weight > 0){
+			mst.insert(best[i].idx);
+		}
 	}
+
 	
 }
 
@@ -134,6 +142,11 @@ vector<edge> MinimumSpanningTreeBoruvkaPar(vector<edge> edgelist, int n, int m, 
 	vector<edge> edgelistCopy = edgelist;
 	set<int> mst;
 
+	startTimer;
+	//std::sort(edgelist.begin(), edgelist.end());
+	endTimer;
+	printTime;
+
 	// form MST
 	int totalN = n;
 
@@ -146,11 +159,14 @@ vector<edge> MinimumSpanningTreeBoruvkaPar(vector<edge> edgelist, int n, int m, 
 	// Steps until only one vertex remains <-> Mst has size n-1
 	while (n > 1){
 
-		startTimer;
+		
 		BoruvkaStepPar(edgelistCopy, ParentVertex, mst, n, m, totalN, numThreads);
-    	endTimer;
-		//printTime;
+    	
 		}
+
+	while(n > 1){
+		// Do Sequential Cutoff size
+	}
 
 	vector<edge> mst_res(totalN-1);
 
@@ -159,6 +175,9 @@ vector<edge> MinimumSpanningTreeBoruvkaPar(vector<edge> edgelist, int n, int m, 
 	for(auto e : mst){
 		mst_res.push_back(edgelist[e]);
 	}
+
+
+	std::cout << "Total time measured: " << TotalTime / 1000000.0;nn;
 
 	return mst_res;
 }

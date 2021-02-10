@@ -6,10 +6,8 @@
 vector<vector<edge>> edgeListToAdjArray(vector<edge> &edgelist, int n, int totalN)
 {
     // initialize adjacency Vector
-    startTimer;
     vector<vector<edge>> result(totalN);
-    endTimer;
-    printTime;
+    
 
     // convert edgelist to adjarr
     // we rewrite edges, such that source dest matches

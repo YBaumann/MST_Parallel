@@ -29,6 +29,7 @@
 using namespace std;
 
 
+
 int main() {
 	ifstream f;
 	f.open("Resources/WattsStrogatz100K.txt");
@@ -44,7 +45,7 @@ int main() {
 	vector<edge> edgel1 = edgeList;
 	vector<edge> edgel2 = edgeList;
 
-	int numThreads = 30; 
+	int numThreads = 2; 
 
 
 	auto S1 = std::chrono::high_resolution_clock::now();
@@ -72,6 +73,7 @@ int main() {
 	}
 	std::cout << "Calculated weight Sequential: " << sw << " Time: " << durationSeq / 1000000.0<< "\n";
 
+	
 
 	//runAllTests();
 

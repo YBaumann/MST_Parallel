@@ -1,5 +1,5 @@
 09 / 02
-We tested The first working parallel Implementation and got the following times:
+We tested The first working parallel Implementation O2 optimization and got the following times:
 Par = 4.6948s
 Seq = 0.291398
 
@@ -26,4 +26,5 @@ Time: 0.206302 sec
 Time: 0.21638 sec
 Time: 0.25962 sec
 
-This makes up 1.37s approximately 30% of the time taken. WHat other factors take long?
+This makes up 3 s out of 5, approximately 60%!
+How can we get this down?
