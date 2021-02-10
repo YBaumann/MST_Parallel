@@ -20,13 +20,12 @@ void BoruvkaStepPar(vector<edge> &edgelist, vector<int> &ParentVertex, set<int> 
 	vector<edge> best(totalN);
 	vector<edge> PrefixScanVector(2*numThreads);
 
-	startTimer;
-	vector<vector<edge>> adjArr = edgeListToAdjArray(edgelist, n, totalN);
-	prefixSeq(prefix, adjArr); 
-	endTimer;
-	//printTime;
 	
-
+	vector<vector<edge>> adjArr = edgeListToAdjArray(edgelist, n, totalN);
+	// To parallelize prefix we need some pow 2 vector
+	prefixSeq(prefix, adjArr); 
+	
+	
 // now comes parallel part
 #pragma omp parallel for ordered
 	for (int tr = 0; tr < numThreads; tr++)
@@ -92,11 +91,13 @@ void BoruvkaStepPar(vector<edge> &edgelist, vector<int> &ParentVertex, set<int> 
 		PrefixScanVector[2*Tid+1] = proposalStartEnd[1];
 	}
 	
+	
     
 	
-	// now do multiprefix scan
+	// now do multiprefix scan, apparently really fast!
 	int differentEdges = 0;
 	multiPrefixScan(PrefixScanVector, differentEdges);
+
 
 	// now insert found edges in parallel
 	// The first differentEdges entries of PrefixScanVec hold the edges we need
@@ -128,7 +129,7 @@ void BoruvkaStepPar(vector<edge> &edgelist, vector<int> &ParentVertex, set<int> 
 			mst.insert(best[i].idx);
 		}
 	}
-
+	
 	
 }
 
@@ -142,11 +143,6 @@ vector<edge> MinimumSpanningTreeBoruvkaPar(vector<edge> edgelist, int n, int m, 
 	vector<edge> edgelistCopy = edgelist;
 	set<int> mst;
 
-	startTimer;
-	//std::sort(edgelist.begin(), edgelist.end());
-	endTimer;
-	printTime;
-
 	// form MST
 	int totalN = n;
 
@@ -156,6 +152,7 @@ vector<edge> MinimumSpanningTreeBoruvkaPar(vector<edge> edgelist, int n, int m, 
 	for(int i = 0; i< totalN; i++){ParentVertex[i] = i;}
 
 	int StepNr = 1;
+	
 	// Steps until only one vertex remains <-> Mst has size n-1
 	while (n > 1){
 
@@ -164,6 +161,7 @@ vector<edge> MinimumSpanningTreeBoruvkaPar(vector<edge> edgelist, int n, int m, 
     	
 		}
 
+	
 	while(n > 1){
 		// Do Sequential Cutoff size
 	}
@@ -178,6 +176,6 @@ vector<edge> MinimumSpanningTreeBoruvkaPar(vector<edge> edgelist, int n, int m, 
 
 
 	std::cout << "Total time measured: " << TotalTime / 1000000.0;nn;
-
+	
 	return mst_res;
 }

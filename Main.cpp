@@ -45,7 +45,7 @@ int main() {
 	vector<edge> edgel1 = edgeList;
 	vector<edge> edgel2 = edgeList;
 
-	int numThreads = 2; 
+	int numThreads = 60; 
 
 
 	auto S1 = std::chrono::high_resolution_clock::now();

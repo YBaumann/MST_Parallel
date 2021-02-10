@@ -3,7 +3,8 @@
 void prefixSeq(vector<int> &prefix, vector<vector<edge>> adjArr){
     // We can parallelize this later
     prefix[0] = 0;
-    for(int i = 1; i < adjArr.size(); i++){
+    int Asize = adjArr.size();
+    for(int i = 1; i < Asize; i++){
         prefix[i] = adjArr[i-1].size() + prefix[i-1];
     }
 }

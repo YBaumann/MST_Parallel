@@ -27,4 +27,11 @@ Time: 0.21638 sec
 Time: 0.25962 sec
 
 This makes up 3 s out of 5, approximately 60%!
-How can we get this down?
+How can we get this down? Times right now:
+3s Edgelist <-> Adjacency adjarray
+0.5s contraction/ParentVertices
+0.85s calculating best edges
+
+out of 5 seconds
+
+

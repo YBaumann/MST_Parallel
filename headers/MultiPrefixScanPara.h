@@ -56,7 +56,7 @@ void multiPrefixScan(vector<edge> &arr, int &foundSize)
 
     
 
-    for(int i = 0; i< arrLen; i++){
+    for(int i = 0; i < arrLen; i++){
         vector<edge> f(arrLen);
         f[0] = arr[i];
         ArrOfLists.push_back(f);
