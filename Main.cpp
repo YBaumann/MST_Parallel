@@ -10,12 +10,15 @@
 #include <omp.h>
 #include <chrono>
 
+
 #include "headers\Structures.h"
+#include "headers\CSR_Format.h"
 #include "headers\EdgelistToAdjArray.h"
 #include "headers\BoruvkaSeq.h"
 #include "headers\KruskalSeq.h"
 #include "headers\CheckConnectivity.h"
 #include "headers\PrimSeq.h" 
+#include "headers\SequentialCutoff.h"
 #include "headers\BoruvkaPara.h"
 #include "headers\TestCases.h"
 
@@ -32,7 +35,7 @@ using namespace std;
 
 int main() {
 	ifstream f;
-	f.open("Resources/WattsStrogatz100K.txt");
+	f.open("Resources/WattsStrogatz100.txt");
 	vector<edge> edgeList;
 	int n; f >> n;
 	int m; f >> m;
@@ -45,11 +48,11 @@ int main() {
 	vector<edge> edgel1 = edgeList;
 	vector<edge> edgel2 = edgeList;
 
-	int numThreads = 60; 
+	int numThreads = 12; 
 
 
 	auto S1 = std::chrono::high_resolution_clock::now();
-    vector<edge> msts = MinimumSpanningTreeBoruvkaSeq(edgel1, n, m);
+    //vector<edge> msts = MinimumSpanningTreeBoruvkaSeq(edgel1, n, m);
     auto S2 = std::chrono::high_resolution_clock::now();
 
     auto durationSeq = std::chrono::duration_cast<std::chrono::microseconds>( S2 - S1 ).count();
@@ -68,7 +71,7 @@ int main() {
 	}
 	std::cout << "Calculated weight Parallel: " << pw << " Time: " << durationPar / 1000000.0 << "\n";
 
-	for(auto e : msts){
+	for(auto e : mstp){
 		sw += e.weight;
 	}
 	std::cout << "Calculated weight Sequential: " << sw << " Time: " << durationSeq / 1000000.0<< "\n";

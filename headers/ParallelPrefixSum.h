@@ -12,6 +12,7 @@ void prefixSeq(vector<int> &prefix, vector<vector<edge>> adjArr){
 
 
 void prefixPar(vector<int> &prefix, vector<vector<edge>> &adjArr){
+
     #pragma omp parallel for
     for(int i = 0; i < prefix.size(); i++){
         prefix[i] = adjArr[i].size();
@@ -21,6 +22,7 @@ void prefixPar(vector<int> &prefix, vector<vector<edge>> &adjArr){
         std::cout << prefix[i] << ' ';
     }
     nn;
+    
     // Now do Prefix: Up-sweep
     int n = prefix.size();
     for(int d = 0; d < log(n); d++){

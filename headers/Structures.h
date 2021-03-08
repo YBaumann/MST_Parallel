@@ -33,32 +33,44 @@ bool operator<(const edge& e1, const edge& e2) {
 
 
 class UnionFind {
-	int* id, cnt, * sz;
+	vector<int> id;
+	vector<int> sz; // size
+	int cnt; // count
+
 public:
 	// Create an empty union find data structure with N isolated sets.
 	UnionFind(int N) {
 		cnt = N; 
-		id = new int[N];
-		sz = new int[N];
 		for (int i = 0; i < N; i++) {
-			id[i] = i;
-			sz[i] = 1;
+			id.push_back(i);
+			sz.push_back(1);
 		}
 	}
 
+	// Somehow this fails for multiedges
 	// Return the id of component corresponding to object p.
 	int find(int p) {
 		int root = p;
-		while (root != id[root]) {
-			root = id[root];
+		
+		for(int i = 0; i < cnt; i++){
+			std::cout << id[i] << ' ';
 		}
-		while (p != root) {
+
+		while (root != id[root]) { // find highest parent
+			std::cout << " comes ";
+			root = id[root];
+			std::cout << root << " <- root \n";
+		}
+		
+		while (p != root) { // p = parent[p] & id[p] = root
 			int newp = id[p]; 
 			id[p] = root; 
 			p = newp; 
 		}
+		
 		return root;
 	}
+
 	// Replace sets containing x and y with their union.
 	void merge(int x, int y) {
 		int i = find(x); int j = find(y); if (i == j) return;

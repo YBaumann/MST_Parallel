@@ -17,12 +17,11 @@ using namespace std;
 
 void BoruvkaStepSeq(set<edge>& mst, vector<edge>& edgelist, UnionFind UF, int n) {
 	vector<edge> BestOutgoingEdges(n); // safe the best edges for each supervertex this round
-
-	for (int i = 0; i < edgelist.size(); i++) { // loop through all edges and find the current best edges
+	int m = edgelist.size();
+	for (int i = 0; i < m; i++) { // loop through all edges and find the current best edges
 		edge e = edgelist[i];
 		int superSource = UF.find(e.source);
 		int superDest = UF.find(e.dest);
-		
 		if (superSource != superDest) { // belong to different supervertices
 			if (e.weight < BestOutgoingEdges[superSource].weight || BestOutgoingEdges[superSource].weight == 0) { // check if its a best edge for source and replace
 				BestOutgoingEdges[superSource] = e;
@@ -31,7 +30,6 @@ void BoruvkaStepSeq(set<edge>& mst, vector<edge>& edgelist, UnionFind UF, int n)
 				BestOutgoingEdges[superDest] = e;
 			}
 		}
-
 	}
 
 
@@ -45,13 +43,13 @@ void BoruvkaStepSeq(set<edge>& mst, vector<edge>& edgelist, UnionFind UF, int n)
 }
 
 
-vector<edge> MinimumSpanningTreeBoruvkaSeq(vector<edge> edgelist, int n, int m) { // This implementation is based on an adjacency list
+vector<edge> MinimumSpanningTreeBoruvkaSeq(vector<edge> edgelist, int n, int m) { // This implementation is based on an undirected graph
 	set<edge> mst; // edgelist of final MST
 	UnionFind UF(n);
 
 	int StepNr = 1;
 	while (mst.size() < n - 1) { // while we dont have a full tree
-		
+		std::cout << StepNr++;nn;
 		BoruvkaStepSeq(mst, edgelist, UF, n); // do one step
     	
 	}

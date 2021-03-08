@@ -22,7 +22,7 @@ void BoruvkaStepPar(vector<edge> &edgelist, vector<int> &ParentVertex, set<int> 
 
 	
 	vector<vector<edge>> adjArr = edgeListToAdjArray(edgelist, n, totalN);
-	// To parallelize prefix we need some pow 2 vector
+	// To parallelize prefix we need some power 2 vector
 	prefixSeq(prefix, adjArr); 
 	
 	
@@ -39,7 +39,7 @@ void BoruvkaStepPar(vector<edge> &edgelist, vector<int> &ParentVertex, set<int> 
 		}
 
 		// find my workloadstart with binsearch
-		int startidx = binSearchlow(prefix, startWL); // Implement correctly TODO
+		int startidx = binSearchlow(prefix, startWL);
 		
 		// TODO prettyfy
 		vector<edge> localEdgeList;
@@ -121,7 +121,6 @@ void BoruvkaStepPar(vector<edge> &edgelist, vector<int> &ParentVertex, set<int> 
 	
 	
 	UpdateEdgelist(edgelist, ParentVertex);
-	
 
 	// We can parallelize this
 	for(int i = 0; i < totalN; i++){
@@ -140,6 +139,7 @@ vector<edge> MinimumSpanningTreeBoruvkaPar(vector<edge> edgelist, int n, int m, 
 	omp_set_num_threads(numThreads);
 
 	// Generate copy, to not alter given edgelist
+	// If we receive the Edges by some other format, we can do the transition here
 	vector<edge> edgelistCopy = edgelist;
 	set<int> mst;
 
@@ -154,19 +154,20 @@ vector<edge> MinimumSpanningTreeBoruvkaPar(vector<edge> edgelist, int n, int m, 
 	int StepNr = 1;
 	
 	// Steps until only one vertex remains <-> Mst has size n-1
-	while (n > 1){
-
+	while (n > 10){
+		
 		
 		BoruvkaStepPar(edgelistCopy, ParentVertex, mst, n, m, totalN, numThreads);
     	
-		}
-
-	
-	while(n > 1){
-		// Do Sequential Cutoff size
 	}
 
-	vector<edge> mst_res(totalN-1);
+	set<int> s;
+	for(auto e : edgelistCopy){
+		s.insert(e.dest); s.insert(e.source);
+	}
+	std::cout << s.size() << " here " << n;nn;
+
+	vector<edge> mst_res = doSequentialCutoff(n, edgelistCopy);
 
 
 	// This still runs in O(n)! 
