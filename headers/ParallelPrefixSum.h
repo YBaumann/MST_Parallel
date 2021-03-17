@@ -9,7 +9,7 @@ void prefixSeq(vector<int> &prefix, vector<vector<edge>> adjArr){
     }
 }
 
-void prefix(vector<int> &prefix, vector<int> adjArr){
+void prefix(vector<int> &prefix, vector<int> adjArr, int useless){
     // We can parallelize this later
     prefix[0] = 0;
     int Asize = adjArr.size();
@@ -25,11 +25,6 @@ void prefixPar(vector<int> &prefix, vector<vector<edge>> &adjArr){
     for(int i = 0; i < prefix.size(); i++){
         prefix[i] = adjArr[i].size();
     }
-
-    for(int i = 0; i < prefix.size(); i++){
-        std::cout << prefix[i] << ' ';
-    }
-    nn;
     
     // Now do Prefix: Up-sweep
     int n = prefix.size();

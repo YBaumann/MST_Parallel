@@ -9,8 +9,13 @@
 #include <cassert>
 #include <omp.h>
 #include <chrono>
+#include <math.h>
 
 
+#include "headers\Prefix.h"
+#include "headers\PrefixAnySize.h"
+#include "headers\vectorOperations.h"
+#include "headers\FindCorrectPlace.h"
 #include "headers\Structures.h"
 #include "headers\CSR_Format.h"
 #include "headers\EdgelistToAdjArray.h"
@@ -53,26 +58,32 @@ int main() {
 
 	int numThreads = 12; 
 	vector<tuple<int,int,int>> testArr;
-	int testsize = 100000;
+	int testsize = 1'000'000;
 	int idsize = 100;
-	int sizesize = 20;
+	int sizesize = 1000;
 	int su = 0;
 	for(int i = 0; i < testsize; i++){
 		int si = rand() %sizesize + 1;
 		su += si;
 		testArr.push_back(make_tuple(rand() % idsize, si,i));
 	}
+
+	std::cout << su;nn;
+	
 	vector<int> toRewrite(su);
+
 
 	for(int i = 0; i < su; i++){
 		toRewrite[i] = i;
 	}
 
-
 	startTimer;
 	rewriteVec(testArr, toRewrite);
 	endTimer;
 	printTime;
+
+
+
 
 
 

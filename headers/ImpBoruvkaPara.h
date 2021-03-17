@@ -5,6 +5,7 @@
 // pair<int,int> = (id,size)
 
 void rewriteVec(vector<tuple<int,int,int>> &arr, vector<int> &toRewrite){ // ID -> Size -> index
+	int threadn = 32;
 	int n = arr.size();
 	int m = toRewrite.size();
 	vector<int> sizesOld(n);
@@ -20,9 +21,10 @@ void rewriteVec(vector<tuple<int,int,int>> &arr, vector<int> &toRewrite){ // ID 
 		sizesNew[i] = get<1>(arr[i]);
 	}
 
-	prefix(oldStartIndices, sizesOld);
-	prefix(newStartIndices, sizesNew);
+	ParPrefixAnySize(oldStartIndices, sizesOld, threadn);
+	ParPrefixAnySize(newStartIndices, sizesNew, threadn);
 
+#pragma omp parallel for
 	for(int i = 0; i < n; i++){
 		int Idn = get<2>(arr[i]);
 		int nrEdges = sizesOld[Idn];
