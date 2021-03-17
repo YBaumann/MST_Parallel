@@ -20,6 +20,7 @@
 #include "headers\PrimSeq.h" 
 #include "headers\SequentialCutoff.h"
 #include "headers\BoruvkaPara.h"
+#include "headers\ImpBoruvkaPara.h"
 #include "headers\TestCases.h"
 
 // We want the output to be an edgelist with edgeids, sorted
@@ -37,46 +38,63 @@ int main() {
 	ifstream f;
 	f.open("Resources/WattsStrogatz100.txt");
 	vector<edge> edgeList;
+	vector<edge> Uedgelist;
 	int n; f >> n;
 	int m; f >> m;
 	for (int i = 0; i < m; i++) {
 		edge e;
-		e.idx = i;
+		e.idx = 2*i;
 		f >> e.source >> e.dest >> e.weight;
 		edgeList.push_back(e);
 	}
+
 	vector<edge> edgel1 = edgeList;
 	vector<edge> edgel2 = edgeList;
 
 	int numThreads = 12; 
+	vector<tuple<int,int,int>> testArr;
+	int testsize = 100000;
+	int idsize = 100;
+	int sizesize = 20;
+	int su = 0;
+	for(int i = 0; i < testsize; i++){
+		int si = rand() %sizesize + 1;
+		su += si;
+		testArr.push_back(make_tuple(rand() % idsize, si,i));
+	}
+	vector<int> toRewrite(su);
+
+	for(int i = 0; i < su; i++){
+		toRewrite[i] = i;
+	}
 
 
-	auto S1 = std::chrono::high_resolution_clock::now();
-    //vector<edge> msts = MinimumSpanningTreeBoruvkaSeq(edgel1, n, m);
-    auto S2 = std::chrono::high_resolution_clock::now();
+	startTimer;
+	rewriteVec(testArr, toRewrite);
+	endTimer;
+	printTime;
 
-    auto durationSeq = std::chrono::duration_cast<std::chrono::microseconds>( S2 - S1 ).count();
 
-	auto P1 = std::chrono::high_resolution_clock::now();
-	vector<edge> mstp = MinimumSpanningTreeBoruvkaPar(edgel2, n, m, numThreads);
-    auto P2 = std::chrono::high_resolution_clock::now();
 
-    auto durationPar = std::chrono::duration_cast<std::chrono::microseconds>( P2 - P1 ).count();
+    /*
+	vector<edge> msts = MinimumSpanningTreeBoruvkaSeq(edgel1, n, m);
+	
+	//vector<edge> mstp = MinimumSpanningTreeBoruvkaPar(edgel2, n, m, numThreads);
 
 	double pw = 0;
 	double sw = 0;
 
-	for(auto e : mstp){
+	for(auto e : msts){
 		pw += e.weight;
 	}
-	std::cout << "Calculated weight Parallel: " << pw << " Time: " << durationPar / 1000000.0 << "\n";
-
-	for(auto e : mstp){
+	std::cout << "Calculated weight Parallel: " << pw ;
+	nn;
+	for(auto e : msts){
 		sw += e.weight;
 	}
-	std::cout << "Calculated weight Sequential: " << sw << " Time: " << durationSeq / 1000000.0<< "\n";
+	std::cout << "Calculated weight Sequential: " << sw ;
 
-	
+	*/
 
 	//runAllTests();
 
