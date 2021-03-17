@@ -9,6 +9,14 @@ void prefixSeq(vector<int> &prefix, vector<vector<edge>> adjArr){
     }
 }
 
+void prefix(vector<int> &prefix, vector<int> adjArr){
+    // We can parallelize this later
+    prefix[0] = 0;
+    int Asize = adjArr.size();
+    for(int i = 1; i < Asize; i++){
+        prefix[i] = adjArr[i-1] + prefix[i-1];
+    }
+}
 
 
 void prefixPar(vector<int> &prefix, vector<vector<edge>> &adjArr){

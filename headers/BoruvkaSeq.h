@@ -15,7 +15,7 @@
 using namespace std;
 
 
-void BoruvkaStepSeq(set<edge>& mst, vector<edge>& edgelist, UnionFind UF, int n) {
+void BoruvkaStepSeq(set<edge>& mst, vector<edge>& edgelist, UnionFind &UF, int n) {
 	vector<edge> BestOutgoingEdges(n); // safe the best edges for each supervertex this round
 	int m = edgelist.size();
 	for (int i = 0; i < m; i++) { // loop through all edges and find the current best edges
@@ -49,7 +49,7 @@ vector<edge> MinimumSpanningTreeBoruvkaSeq(vector<edge> edgelist, int n, int m) 
 
 	int StepNr = 1;
 	while (mst.size() < n - 1) { // while we dont have a full tree
-		std::cout << StepNr++;nn;
+		std::cout << mst.size() << " hi";nn;
 		BoruvkaStepSeq(mst, edgelist, UF, n); // do one step
     	
 	}
@@ -58,7 +58,8 @@ vector<edge> MinimumSpanningTreeBoruvkaSeq(vector<edge> edgelist, int n, int m) 
 	for (auto e : mst) {
 		result.push_back(e);
 	}
-
+	
+	
 	return result;
 }
 

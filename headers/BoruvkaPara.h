@@ -154,20 +154,17 @@ vector<edge> MinimumSpanningTreeBoruvkaPar(vector<edge> edgelist, int n, int m, 
 	int StepNr = 1;
 	
 	// Steps until only one vertex remains <-> Mst has size n-1
-	while (n > 10){
-		
-		
+	while (n > 1){
 		BoruvkaStepPar(edgelistCopy, ParentVertex, mst, n, m, totalN, numThreads);
     	
 	}
-
+	exit(1);
 	set<int> s;
 	for(auto e : edgelistCopy){
 		s.insert(e.dest); s.insert(e.source);
 	}
-	std::cout << s.size() << " here " << n;nn;
 
-	vector<edge> mst_res = doSequentialCutoff(n, edgelistCopy);
+	vector<edge> mst_res;
 
 
 	// This still runs in O(n)! 
@@ -175,8 +172,6 @@ vector<edge> MinimumSpanningTreeBoruvkaPar(vector<edge> edgelist, int n, int m, 
 		mst_res.push_back(edgelist[e]);
 	}
 
-
-	std::cout << "Total time measured: " << TotalTime / 1000000.0;nn;
 	
 	return mst_res;
 }
