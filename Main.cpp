@@ -58,9 +58,9 @@ int main() {
 
 	int numThreads = 12; 
 	vector<tuple<int,int,int>> testArr;
-	int testsize = 1'000'000;
-	int idsize = 100;
-	int sizesize = 1000;
+	int testsize = 10'000'000;
+	int idsize = 28;
+	int sizesize = 100;
 	int su = 0;
 	for(int i = 0; i < testsize; i++){
 		int si = rand() %sizesize + 1;
@@ -68,7 +68,7 @@ int main() {
 		testArr.push_back(make_tuple(rand() % idsize, si,i));
 	}
 
-	std::cout << su;nn;
+	std::cout << su; nn;
 	
 	vector<int> toRewrite(su);
 
@@ -77,10 +77,14 @@ int main() {
 		toRewrite[i] = i;
 	}
 
+	vector<int> newSizes;
+
 	startTimer;
-	rewriteVec(testArr, toRewrite);
+	rewriteVec(testArr, toRewrite, newSizes); // testArr stores the rewritten array
 	endTimer;
+	nn;
 	printTime;
+	
 
 
 
