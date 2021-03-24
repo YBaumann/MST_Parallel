@@ -55,23 +55,15 @@ int main() {
 
 	int numThreads = 12; 
 	vector<tuple<int,int,int>> testArr;
-<<<<<<< HEAD
-	int testsize = 3;
+	int testsize = 4;
 	int idsize = 2;
-	int sizesize = 7;
-=======
-	int testsize = 10'000'000;
-	int idsize = 28;
-	int sizesize = 100;
->>>>>>> 32bd3999238e14225b5378ab77809e3b21c5761a
+	int sizesize = 5;
 	int su = 0;
 	for(int i = 0; i < testsize; i++){
 		int si = rand() %sizesize + 1;
 		su += si;
 		testArr.push_back(make_tuple(rand() % idsize, si,i));
 	}
-
-	std::cout << su; nn;
 	
 	vector<int> toRewrite(su);
 
@@ -82,26 +74,13 @@ int main() {
 
 	vector<int> newSizes;
 
-	startTimer;
-<<<<<<< HEAD
-	rewriteEdges(testArr, toRewrite); // toRewrite holds the 
-=======
-	rewriteVec(testArr, toRewrite, newSizes); // testArr stores the rewritten array
->>>>>>> 32bd3999238e14225b5378ab77809e3b21c5761a
-	endTimer;
-	nn;
-	printTime;
-	
 
+	// toRewrite[i] = i --> new indices for all edges
+	// testArr will store the current sizes supervertex indices and starting indices
+	// new Sizes wil store the number of outgoing edges of the superverteices
+	// Next: try for edges
+	rewriteEdges(testArr, toRewrite, newSizes);
 
-
-
-
-	for(int i = 0; i < toRewrite.size(); i++){
-		std::cout << toRewrite[i] << ' ';
-	}
-
-	
 
 
 	return 0;
