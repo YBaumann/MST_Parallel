@@ -38,7 +38,7 @@ int main() {
 	ifstream f;
 	f.open("Resources/WattsStrogatz100.txt");
 	vector<edge> edgeList;
-	vector<edge> Uedgelist;
+
 	int n; f >> n;
 	int m; f >> m;
 	for (int i = 0; i < m; i++) {
@@ -48,14 +48,11 @@ int main() {
 		edgeList.push_back(e);
 	}
 
-	vector<edge> edgel1 = edgeList;
-	vector<edge> edgel2 = edgeList;
-
 	int numThreads = 12; 
 	vector<tuple<int,int,int>> testArr;
-	int testsize = 100000;
-	int idsize = 100;
-	int sizesize = 20;
+	int testsize = 3;
+	int idsize = 2;
+	int sizesize = 7;
 	int su = 0;
 	for(int i = 0; i < testsize; i++){
 		int si = rand() %sizesize + 1;
@@ -70,33 +67,14 @@ int main() {
 
 
 	startTimer;
-	rewriteVec(testArr, toRewrite);
+	rewriteEdges(testArr, toRewrite); // toRewrite holds the 
 	endTimer;
 	printTime;
 
 
-
-    /*
-	vector<edge> msts = MinimumSpanningTreeBoruvkaSeq(edgel1, n, m);
-	
-	//vector<edge> mstp = MinimumSpanningTreeBoruvkaPar(edgel2, n, m, numThreads);
-
-	double pw = 0;
-	double sw = 0;
-
-	for(auto e : msts){
-		pw += e.weight;
+	for(int i = 0; i < toRewrite.size(); i++){
+		std::cout << toRewrite[i] << ' ';
 	}
-	std::cout << "Calculated weight Parallel: " << pw ;
-	nn;
-	for(auto e : msts){
-		sw += e.weight;
-	}
-	std::cout << "Calculated weight Sequential: " << sw ;
-
-	*/
-
-	//runAllTests();
 
 	
 
