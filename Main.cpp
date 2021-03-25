@@ -47,44 +47,34 @@ int main() {
 	int n; f >> n;
 	int m; f >> m;
 	for (int i = 0; i < m; i++) {
-		edge e;
-		e.idx = i;
-		f >> e.source >> e.dest >> e.weight;
-		edgelist.push_back(e);
+		edge e1;
+		edge e2;
+		e1.idx = 2*i;
+		e2.idx = 2*i+1;
+		f >> e1.source >> e1.dest >> e1.weight;
+		e2.source = e1.dest;
+		e2.dest = e1.source;
+		e2.weight = e1.weight;
+		edgelist.push_back(e1);
+		edgelist.push_back(e2);
 	}
+	// We add two edges
+	m = 2*m;
 
-	vector<int> sizes(n);
-	vector<int> indices(m);
-	vector<int> newSizes;
+	// Sort the edgelist
+	auto compara = [](edge e1, edge e2){return e1.source <= e2.source;};
+	sort(edgelist.begin(), edgelist.end(), compara);
 
+	// Count outgoing sizes -> This can be parallel
+	vector<int> outgoingEdges(n);
 	for(int i = 0; i < m; i++){
-		sizes[edgelist[i].source]++;
-		indices[i] = i;
+		outgoingEdges[edgelist[i].source]++;
 	}
 
-	vector<tuple<int,int,int>> arr(n); // tuple<int,int,int> = ID -> Size -> index
-
-	for(int i = 0; i < n; i++){
-		arr[i] = make_tuple(rand() % 4, sizes[i], i);
-	}
+	int nrThreads = 2;
+	vector<edge> sol = ParBoruvkaImp(edgelist, outgoingEdges, n, m, nrThreads);
 
 	
-
-	rewriteEdges(arr, indices, newSizes);
-
-	for(int i = 0; i < n; i++){
-		std::cout << get<0>(arr[i]) << ' ';
-	}
-	nn;
-	for(int i = 0; i < n; i++){
-		std::cout << get<1>(arr[i]) << ' ';
-	}
-	nn;
-
-	for(int i = 0; i < newSizes.size(); i++){
-		std::cout << newSizes[i] << ' ';
-	}
-
 
 	return 0;
 }
