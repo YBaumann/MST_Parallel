@@ -41,46 +41,49 @@ using namespace std;
 
 int main() {
 	ifstream f;
-	f.open("Resources/WattsStrogatz100.txt");
-	vector<edge> edgeList;
+	f.open("Resources/WattsStrog.txt");
+	vector<edge> edgelist;
 
 	int n; f >> n;
 	int m; f >> m;
 	for (int i = 0; i < m; i++) {
 		edge e;
-		e.idx = 2*i;
+		e.idx = i;
 		f >> e.source >> e.dest >> e.weight;
-		edgeList.push_back(e);
+		edgelist.push_back(e);
 	}
 
-	int numThreads = 12; 
-	vector<tuple<int,int,int>> testArr;
-	int testsize = 4;
-	int idsize = 2;
-	int sizesize = 5;
-	int su = 0;
-	for(int i = 0; i < testsize; i++){
-		int si = rand() %sizesize + 1;
-		su += si;
-		testArr.push_back(make_tuple(rand() % idsize, si,i));
-	}
-	
-	vector<int> toRewrite(su);
-
-
-	for(int i = 0; i < su; i++){
-		toRewrite[i] = i;
-	}
-
+	vector<int> sizes(n);
+	vector<int> indices(m);
 	vector<int> newSizes;
 
+	for(int i = 0; i < m; i++){
+		sizes[edgelist[i].source]++;
+		indices[i] = i;
+	}
 
-	// toRewrite[i] = i --> new indices for all edges
-	// testArr will store the current sizes supervertex indices and starting indices
-	// new Sizes wil store the number of outgoing edges of the superverteices
-	// Next: try for edges
-	rewriteEdges(testArr, toRewrite, newSizes);
+	vector<tuple<int,int,int>> arr(n); // tuple<int,int,int> = ID -> Size -> index
 
+	for(int i = 0; i < n; i++){
+		arr[i] = make_tuple(rand() % 4, sizes[i], i);
+	}
+
+	
+
+	rewriteEdges(arr, indices, newSizes);
+
+	for(int i = 0; i < n; i++){
+		std::cout << get<0>(arr[i]) << ' ';
+	}
+	nn;
+	for(int i = 0; i < n; i++){
+		std::cout << get<1>(arr[i]) << ' ';
+	}
+	nn;
+
+	for(int i = 0; i < newSizes.size(); i++){
+		std::cout << newSizes[i] << ' ';
+	}
 
 
 	return 0;

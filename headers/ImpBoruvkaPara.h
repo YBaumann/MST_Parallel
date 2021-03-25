@@ -40,6 +40,7 @@ void rewriteEdges(vector<tuple<int,int,int>> &arr, vector<int> &toRewrite, vecto
 			sol[newStartIndices[i] + j] = toRewrite[oldStartIndices[Idn] + j];
 		}
 	}
+
 	toRewrite = sol;
 
 	// calculate the new number of outgoing edges per supervertex
@@ -58,27 +59,30 @@ void rewriteEdges(vector<tuple<int,int,int>> &arr, vector<int> &toRewrite, vecto
 	ParPrefixAnySize(prefNewSizes, newSizes, threadn);
 
 	// get number of supervertices for new edgelist
-	int newSize = prefNewSizes[n-1] + 1;
+	int newSize = prefNewSizes[n-1]+1;
 
 
 	// Write number of edges per supervertex into respective index
-	vector<int> numEdgesBefore(newSize);
+	vector<int> numEdgesBefore(newSize+1);
 
 	for(int i = 1; i < n; i++){
 		if(newSizes[i] == 1){
-			numEdgesBefore[prefNewSizes[i]-1] = newStartIndices[i];
+			numEdgesBefore[prefNewSizes[i]] = newStartIndices[i];
 		}
 	}
 	
-	numEdgesBefore[newSize-1] = toRewrite.size();
+	numEdgesBefore[newSize] = toRewrite.size();
+
+	std::cout << newSize;nn;
 
 	newSizes = vector<int>(newSize);
 	newSizes[0] = numEdgesBefore[0];
 
 	// Calculate exact number of edges and return
-	for(int i = 1; i < newSize; i++){
+	for(int i = 1; i < newSize+1; i++){
 		newSizes[i-1] = numEdgesBefore[i] - numEdgesBefore[i-1];
 	}
+
 	
 
 
