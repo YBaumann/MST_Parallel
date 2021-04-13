@@ -2,7 +2,7 @@
 
 
 
-void ImpStep(vector<edge> &edgelist, vector<int> outgoingSizes, vector<int> &ParentVertex, int n, int m, int numThreads, set<int> mst)
+void ImpStep(vector<edge> &edgelist, vector<int> outgoingSizes, vector<int> &ParentVertex, int &n, int m, int numThreads, set<int> mst)
 {
 
 	// Datastructures
@@ -67,10 +67,14 @@ void ImpStep(vector<edge> &edgelist, vector<int> outgoingSizes, vector<int> &Par
 
 		PrefixScanVector[2 * Tid] = proposalStartEnd[0];
 		PrefixScanVector[2 * Tid + 1] = proposalStartEnd[1];
-		//std::cout << "End of loop\n";
+		std::cout << "End of loop\n";
 	}
 
 	// now do multiprefix scan, apparently really fast!
+	std::cout << "Start Multi Prefix\n";
+	for(int i = 0; i < PrefixScanVector.size(); i++){
+		std::cout << PrefixScanVector[i].source << ' ';
+	}
 	int differentEdges = 0;
 	multiPrefixScan(PrefixScanVector, differentEdges);
 
@@ -83,6 +87,7 @@ void ImpStep(vector<edge> &edgelist, vector<int> outgoingSizes, vector<int> &Par
 	}
 
 	// Find Parent Vertex of all vertices
+	std::cout << "Find Parents\n";
 	int newn = n;
 	findParents1(ParentVertex, best, newn);
 
@@ -102,10 +107,6 @@ void ImpStep(vector<edge> &edgelist, vector<int> outgoingSizes, vector<int> &Par
 	rewriteVec(arr, newIdx, newSizes);
 	n = newSizes.size();
 
-	for(int i = 0; i < newSizes.size(); i++){
-		std::cout << newSizes[i] << ' ';
-	}
-	nn;
 	// Write egelist to new Indices
 	vector<edge> edgelist2(edgelist.size());
 
@@ -118,11 +119,14 @@ void ImpStep(vector<edge> &edgelist, vector<int> outgoingSizes, vector<int> &Par
 		edgelist[i].dest = ParentVertex[edgelist[i].dest];
 	}
 
-	for(int i = 0; i < m; i++){
-		std::cout << edgelist[i].source << ' ' << edgelist[i].dest;nn;
-
+	// Insert found edges into mst
+	for(int i = 0; i < best.size(); i++){
+		if(best[i].weight > 0){
+			mst.insert(best[i].idx);
+		}
 	}
 
+	std::cout << "finishes loop\n";
 }
 
 
@@ -148,7 +152,7 @@ vector<edge> ParBoruvkaImp(vector<edge> edgelist, vector<int> outgoingSizes, int
 	while (n > 1)
 	{
 		ImpStep(edgelist, outgoingSizes, ParentVertex, n, m, numThreads, mst);
-		n = 1;
+		std::cout << n;nn;
 	}
 
 	vector<edge> mst_res = vector<edge>();
