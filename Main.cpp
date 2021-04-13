@@ -25,6 +25,7 @@
 #include "headers\PrimSeq.h" 
 #include "headers\SequentialCutoff.h"
 #include "headers\BoruvkaPara.h"
+#include "headers\rewriteVector.h"
 #include "headers\ImpBoruvkaPara.h"
 #include "headers\TestCases.h"
 
