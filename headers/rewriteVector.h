@@ -1,6 +1,8 @@
 #pragma once
 
+// void prefix(vector<int> &prefix, vector<int> adjArr) returns prefix in vector<int> prefix
 
+// pair<int,int> = ID -> Size -> index
 
 void rewriteVec(vector<tuple<int,int,int>> &arr, vector<int> &toRewrite, vector<int> &newSizes){ // ID -> Size -> index
 	int threadn = 32;

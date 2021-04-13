@@ -1,8 +1,6 @@
 #pragma once
 
-// void prefix(vector<int> &prefix, vector<int> adjArr) returns prefix in vector<int> prefix
 
-// pair<int,int> = ID -> Size -> index
 
 void ImpStep(vector<edge> &edgelist, vector<int> outgoingSizes, vector<int> &ParentVertex, int n, int m, int numThreads, set<int> mst)
 {
@@ -69,7 +67,7 @@ void ImpStep(vector<edge> &edgelist, vector<int> outgoingSizes, vector<int> &Par
 
 		PrefixScanVector[2 * Tid] = proposalStartEnd[0];
 		PrefixScanVector[2 * Tid + 1] = proposalStartEnd[1];
-		std::cout << "End of loop\n";
+		//std::cout << "End of loop\n";
 	}
 
 	// now do multiprefix scan, apparently really fast!
@@ -85,10 +83,46 @@ void ImpStep(vector<edge> &edgelist, vector<int> outgoingSizes, vector<int> &Par
 	}
 
 	// Find Parent Vertex of all vertices
-	findParents1(ParentVertex, best, n);
+	int newn = n;
+	findParents1(ParentVertex, best, newn);
 
+	// Setup vector to rewrite
+	vector<tuple<int,int,int>> arr(n); // tuple<int,int,int> = ID -> Size -> index
+	for(int i = 0; i < n; i++){
+		arr[i] = make_tuple(ParentVertex[i], outgoingSizes[i], i);
+		
+	}
+	vector<int> newIdx(m);
+	for(int i = 0; i < m; i++){
+		newIdx[i] = i;
+	}
+	vector<int> newSizes;
 
-	std::cout << "finishes";
+	// Get new Indices
+	rewriteVec(arr, newIdx, newSizes);
+	n = newSizes.size();
+
+	for(int i = 0; i < newSizes.size(); i++){
+		std::cout << newSizes[i] << ' ';
+	}
+	nn;
+	// Write egelist to new Indices
+	vector<edge> edgelist2(edgelist.size());
+
+	for(int i = 0; i < edgelist.size(); i++){
+		edgelist2[i] = edgelist[newIdx[i]];
+	}
+	edgelist = edgelist2;
+	for(int i = 0; i < edgelist.size(); i++){
+		edgelist[i].source = ParentVertex[edgelist[i].source];
+		edgelist[i].dest = ParentVertex[edgelist[i].dest];
+	}
+
+	for(int i = 0; i < m; i++){
+		std::cout << edgelist[i].source << ' ' << edgelist[i].dest;nn;
+
+	}
+
 }
 
 
