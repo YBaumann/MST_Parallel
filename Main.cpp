@@ -48,19 +48,21 @@ int main() {
 	int n; f >> n;
 	int m; f >> m;
 	for (int i = 0; i < m; i++) {
-		edge e1;
-		edge e2;
-		e1.idx = 2*i;
-		e2.idx = 2*i+1;
+		edge e1 = edge(0,0,0,0);
+		e1.idx = i;
 		f >> e1.source >> e1.dest >> e1.weight;
-		e2.source = e1.dest;
-		e2.dest = e1.source;
-		e2.weight = e1.weight;
+		edge e2 = edge(e1.dest,e1.source, e1.weight, e1.idx);
 		edgelist.push_back(e1);
 		edgelist.push_back(e2);
 	}
 	// We add two edges
 	m = 2*m;
+
+	// Print given edgelist:
+	std::cout << "Given edgelist: \n";
+	for(int i = 0; i < edgelist.size(); i++){
+		std::cout << edgelist[i].source << ' ' << edgelist[i].dest << ' ' << edgelist[i].weight;nn;
+	}
 
 	// Sort the edgelist
 	auto compara = [](edge e1, edge e2){return e1.source <= e2.source;};

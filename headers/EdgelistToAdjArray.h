@@ -13,12 +13,8 @@ vector<vector<edge>> edgeListToAdjArray(vector<edge> &edgelist, int n, int total
     // we rewrite edges, such that source dest matches
     for(int i = 0; i < edgelist.size(); i++){
         edge e = edgelist[i];
-        edge f;
+        edge f = edge(e.source,e.dest,e.weight,e.idx);
         result[e.source].push_back(e); 
-        f.source = e.dest; 
-        f.dest = e.source; 
-        f.weight = e.weight; 
-        f.idx = e.idx;
         result[e.dest].push_back(f);
     }
 

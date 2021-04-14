@@ -1,10 +1,10 @@
 #pragma once
 
-void ImpStep(vector<edge> &edgelist, vector<int> outgoingSizes, vector<int> &ParentVertex, int &n, int m, int numThreads, set<int> &mst)
+void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> &ParentVertex, int &n, int m, int numThreads, set<int> &mst, int TotalN)
 {
 
 	// Datastructures
-	vector<edge> best(n);
+	vector<edge> best(TotalN);
 	vector<edge> PrefixScanVector(2 * numThreads);
 
 	// Divide Workload per processor
@@ -22,7 +22,7 @@ void ImpStep(vector<edge> &edgelist, vector<int> outgoingSizes, vector<int> &Par
 		nn;
 		if (Tid == numThreads - 1)
 		{
-			endWL = m;
+			endWL = edgelist.size();
 		}
 
 		// Find best edges for all vertices
@@ -40,6 +40,7 @@ void ImpStep(vector<edge> &edgelist, vector<int> outgoingSizes, vector<int> &Par
 			{
 				continue;
 			}
+
 			if (e.source == startVertexIndices)
 			{ // proposal coliding start
 				if (proposalStartEnd[0].weight == 0 || (proposalStartEnd[0].weight > e.weight))
@@ -66,16 +67,18 @@ void ImpStep(vector<edge> &edgelist, vector<int> outgoingSizes, vector<int> &Par
 		// Insert propositions into vector
 		PrefixScanVector[2*Tid] = proposalStartEnd[0];
 		PrefixScanVector[2*Tid+1] = proposalStartEnd[1];
-		std::cout << "Propend: " << proposalStartEnd[1].source;nn;
+		std::cout << "Proppsal end: " << proposalStartEnd[1].source;nn;
 	}
 
 	// now do multiprefix scan, apparently really fast!
 	std::cout << "Start Multi Prefix\n";
-
-	nn;
 	int differentEdges = 0;
 	multiPrefixScan(PrefixScanVector, differentEdges);
 	std::cout << "Leaves multiP\n";
+
+	for(int i = 0; i < PrefixScanVector.size(); i++){
+		std::cout << PrefixScanVector[i].source << ' ' << PrefixScanVector[i].dest << " " << best.size();nn;
+	}
 
 	// now insert found edges in parallel
 	// The first differentEdges entries of PrefixScanVec hold the edges we need
@@ -90,6 +93,13 @@ void ImpStep(vector<edge> &edgelist, vector<int> outgoingSizes, vector<int> &Par
 	std::cout << "Find Parents\n";
 	int newn = n;
 	findParents1(ParentVertex, best, newn);
+
+	// show parents
+	std::cout << "Show parents: \n";
+	for(int i = 0; i < ParentVertex.size(); i++){
+		std::cout << ParentVertex[i] << ' ';
+	}
+	nn;
 
 	// Setup vector to rewrite
 	vector<tuple<int, int, int>> arr(n); // tuple<int,int,int> = ID -> Size -> index
@@ -107,34 +117,52 @@ void ImpStep(vector<edge> &edgelist, vector<int> outgoingSizes, vector<int> &Par
 	// Get new Indices
 	rewriteVec(arr, newIdx, newSizes);
 	n = newSizes.size();
+	outgoingSizes = newSizes;
+
+	// show id
+	std::cout << "Show id->Size: \n";
+	for(int i = 0; i < arr.size(); i++){
+		std::cout << get<0>(arr[i]) << "->" << newSizes[i]<< "  ";
+	}
+	nn;
+
+	// show new idx
+	std::cout << "new idx: \n";
+	for(int i = 0; i < newIdx.size(); i++){
+		std::cout << newIdx[i] << ' ';
+	}
+	nn;
 
 	// Write egelist to new Indices
 	vector<edge> edgelist2(edgelist.size());
+	edgelist2 = edgelist;
 
 	for (int i = 0; i < edgelist.size(); i++)
 	{
-		edgelist2[i] = edgelist[newIdx[i]];
+		edgelist2[i] = edgelist[i];
 	}
-	edgelist = edgelist2;
+
+
+	// Rename edges, to their supervertex
 	for (int i = 0; i < edgelist.size(); i++)
 	{
-		edgelist[i].source = ParentVertex[edgelist2[i].source];
-		edgelist[i].dest = ParentVertex[edgelist2[i].dest];
+		edgelist[i].source = ParentVertex[edgelist[i].source];
+		edgelist[i].dest = ParentVertex[edgelist[i].dest];
 	}
 	
 
 	// Insert found edges into mst
 	for (int i = 0; i < best.size(); i++)
 	{
-		if (best[i].weight > 0)
-		{
+		if(best[i].weight > 0){
 			mst.insert(best[i].idx);
+			std::cout << "here\n";
 		}
 	}
 
 	std::cout << "finishes loop\n";
 	for(int i = 0; i < edgelist.size(); i++){
-		std::cout << edgelist[i].source << " " << edgelist[i].dest;nn;
+		std::cout << edgelist[i].source << " " << edgelist[i].dest << ' ' << edgelist[i].weight;nn;
 	}
 }
 
@@ -151,24 +179,31 @@ vector<edge> ParBoruvkaImp(vector<edge> edgelist, vector<int> outgoingSizes, int
 
 	// Create ParentVertex Vector
 	vector<int> ParentVertex(n);
+	std::cout << "Assign Parents\n";
 	for (int i = 0; i < n; i++)
 	{
 		ParentVertex[i] = i;
+		std::cout << ParentVertex[i]<< ' '; 
 	}
+	nn;
+	int totalN = n;
 
 	// Steps until only one vertex remains <-> Mst has size n-1
 	while (n > 1)
 	{
-		ImpStep(edgelist, outgoingSizes, ParentVertex, n, m, numThreads, mst);
+		ImpStep(edgelist, outgoingSizes, ParentVertex, n, m, numThreads, mst,totalN);
 		std::cout << "Remaining vertices: " << n;
 		nn;
+		std::cout << "Current mst size: " << mst.size();nn;
 	}
 
 	std::cout << mst.size() << " Get to return\n";
 	vector<edge> mst_res;
+	std::cout << "Now for edges: \n";
 	for (auto e : mst)
 	{
 		mst_res.push_back(edgelistcpy[e]);
+		std::cout << edgelistcpy[e].weight << ' ';
 	}
 
 	return mst_res;

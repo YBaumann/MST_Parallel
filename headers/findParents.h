@@ -27,4 +27,5 @@ void findParents1(vector<int> &ParentVertex, vector<edge> best, int &n){
             ParentVertex[i] = ParentVertex[best[i].dest];
         }
     }
+    std::cout << "Leaves\n";
 }

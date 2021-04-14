@@ -15,7 +15,8 @@ using namespace std;
 
 struct edge {
 	int source, dest, weight, idx;
-
+	edge(){this->source = 0; this->dest = 0; this->weight = 0; this->idx = 0;}
+	edge(int s,int d,int w,int i) {this->source = s; this->dest = d; this->weight = w; this->idx = i;}
 };
 
 bool operator<(const edge& e1, const edge& e2) {
@@ -30,7 +31,6 @@ bool operator<(const edge& e1, const edge& e2) {
 	}
 
 }
-
 
 class UnionFind {
 	vector<int> id;

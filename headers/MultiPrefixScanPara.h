@@ -51,14 +51,8 @@ void doScan(vector<vector<edge>> &ArrOfLists, vector<int> &sizes){
 void multiPrefixScan(vector<edge> &arr, int &foundSize)
 {
     int arrLen = arr.size();
-    std::cout << "print arr:\n";
-    for(int i = 0; i < arrLen; i++){
-        std::cout << arr[i].source <<' ';
-    }
-    std::cout << arrLen;nn;
     vector<vector<edge>> ArrOfLists;
     ArrOfLists.reserve(arrLen*arrLen);
-    std::cout << "Reaches to for\n";
     vector<int> sizes(arrLen,1);
 
 
@@ -69,7 +63,6 @@ void multiPrefixScan(vector<edge> &arr, int &foundSize)
         // ArrOfLists[i] = f;
         ArrOfLists.push_back(f);
     }
-    std::cout << "Reach doScan\n";
 
     doScan(ArrOfLists, sizes); // result is saved in position 0 of arrOfLists
 
