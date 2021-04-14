@@ -42,7 +42,7 @@ using namespace std;
 
 int main() {
 	ifstream f;
-	f.open("Resources/WattsStrogatz100.txt");
+	f.open("Resources/WattsStrog.txt");
 	vector<edge> edgelist;
 
 	int n; f >> n;
@@ -75,8 +75,12 @@ int main() {
 	int nrThreads = 2;
 	std::cout << "Calc MST\n";
 	vector<edge> sol = ParBoruvkaImp(edgelist, outgoingEdges, n, m, nrThreads);
-
-	
+	int parRes = 0;
+	for(auto e : sol){
+		parRes += e.weight;
+	}
+	nn;
+	std::cout << "ImpBor: " << parRes;nn;
 
 	return 0;
 }
