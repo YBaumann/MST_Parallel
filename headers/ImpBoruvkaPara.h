@@ -76,7 +76,7 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> &Pa
 	multiPrefixScan(PrefixScanVector, differentEdges);
 	std::cout << "Leaves multiP\n";
 
-	for(int i = 0; i < PrefixScanVector.size(); i++){
+	for(int i = 0; i < differentEdges; i++){
 		std::cout << PrefixScanVector[i].source << ' ' << PrefixScanVector[i].dest << " " << best.size();nn;
 	}
 
@@ -93,7 +93,7 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> &Pa
 	std::cout << "Find Parents\n";
 	int newn = n;
 	findParents1(ParentVertex, best, newn);
-
+	n = newn;
 	// show parents
 	std::cout << "Show parents: \n";
 	for(int i = 0; i < ParentVertex.size(); i++){
@@ -102,8 +102,8 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> &Pa
 	nn;
 
 	// Setup vector to rewrite
-	vector<tuple<int, int, int>> arr(n); // tuple<int,int,int> = ID -> Size -> index
-	for (int i = 0; i < n; i++)
+	vector<tuple<int, int, int>> arr(TotalN); // tuple<int,int,int> = ID -> Size -> index
+	for (int i = 0; i < TotalN; i++)
 	{
 		arr[i] = make_tuple(ParentVertex[i], outgoingSizes[i], i);
 	}
@@ -114,17 +114,24 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> &Pa
 	}
 	vector<int> newSizes;
 
-	// Get new Indices
-	rewriteVec(arr, newIdx, newSizes);
-	n = newSizes.size();
-	outgoingSizes = newSizes;
-
 	// show id
 	std::cout << "Show id->Size: \n";
 	for(int i = 0; i < arr.size(); i++){
-		std::cout << get<0>(arr[i]) << "->" << newSizes[i]<< "  ";
+		std::cout << get<0>(arr[i]) << "->" << outgoingSizes[i]<< "  ";
 	}
 	nn;
+	std::cout << "Rewrite\n";
+	// Get new Indices
+	rewriteVec(arr, newIdx, newSizes);
+	outgoingSizes = newSizes;
+
+	std::cout << "NewSize: \n";
+	for(int i = 0; i < arr.size(); i++){
+		std::cout << newSizes[i]<< "  ";
+	}
+	nn;
+
+	
 
 	// show new idx
 	std::cout << "new idx: \n";
@@ -139,7 +146,7 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> &Pa
 
 	for (int i = 0; i < edgelist.size(); i++)
 	{
-		edgelist2[i] = edgelist[i];
+		edgelist[i] = edgelist2[newIdx[i]];
 	}
 
 
@@ -152,13 +159,15 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> &Pa
 	
 
 	// Insert found edges into mst
+	std::cout << "New Edges: \n";
 	for (int i = 0; i < best.size(); i++)
 	{
 		if(best[i].weight > 0){
 			mst.insert(best[i].idx);
-			std::cout << "here\n";
+			std::cout << best[i].weight << ' ';
 		}
 	}
+	nn;
 
 	std::cout << "finishes loop\n";
 	for(int i = 0; i < edgelist.size(); i++){
@@ -195,16 +204,25 @@ vector<edge> ParBoruvkaImp(vector<edge> edgelist, vector<int> outgoingSizes, int
 		std::cout << "Remaining vertices: " << n;
 		nn;
 		std::cout << "Current mst size: " << mst.size();nn;
+		std::cout << "Current mst weights: \n";
+		
+		for(int i = 0; i < edgelistcpy.size(); i++){
+			if(mst.count(edgelistcpy[i].idx) && edgelistcpy[i].source < edgelistcpy[i].dest){	
+				std::cout << edgelistcpy[i].weight << ' ';
+			}
+		}
+		nn;
+		
 	}
 
 	std::cout << mst.size() << " Get to return\n";
 	vector<edge> mst_res;
 	std::cout << "Now for edges: \n";
-	for (auto e : mst)
-	{
-		mst_res.push_back(edgelistcpy[e]);
-		std::cout << edgelistcpy[e].weight << ' ';
-	}
+	for(int i = 0; i < edgelistcpy.size(); i++){
+			if(mst.count(edgelistcpy[i].idx) && edgelistcpy[i].source < edgelistcpy[i].dest){	
+				mst_res.push_back(edgelistcpy[i]);
+			}
+		}
 
 	return mst_res;
 }

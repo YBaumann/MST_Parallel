@@ -28,7 +28,7 @@ void rewriteVec(vector<tuple<int,int,int>> &arr, vector<int> &toRewrite, vector<
 
 	ParPrefixAnySize(oldStartIndices, sizesOld, threadn);
 	ParPrefixAnySize(newStartIndices, sizesNewOrder, threadn);
-
+	std::cout << "First para\n";
 	// calculate the indices for each edge of the new edgelist
 #pragma omp parallel for
 	for(int i = 0; i < n; i++){
@@ -73,8 +73,12 @@ void rewriteVec(vector<tuple<int,int,int>> &arr, vector<int> &toRewrite, vector<
 	newSizes[0] = numEdgesBefore[0];
 
 	// Calculate exact number of edges and return
-	for(int i = 1; i < newSize; i++){
+	int i;
+	for(i = 1; i < newSize; i++){
 		newSizes[i] = numEdgesBefore[i] - numEdgesBefore[i-1];
+	}
+	for(; i < newSizes.size(); i++){
+		newSizes[i] = 0;
 	}
 	
 

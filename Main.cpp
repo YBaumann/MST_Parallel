@@ -58,15 +58,16 @@ int main() {
 	// We add two edges
 	m = 2*m;
 
+
+	// Sort the edgelist
+	auto compara = [](edge e1, edge e2){return e1.source <= e2.source;};
+	sort(edgelist.begin(), edgelist.end(), compara);
+
 	// Print given edgelist:
 	std::cout << "Given edgelist: \n";
 	for(int i = 0; i < edgelist.size(); i++){
 		std::cout << edgelist[i].source << ' ' << edgelist[i].dest << ' ' << edgelist[i].weight;nn;
 	}
-
-	// Sort the edgelist
-	auto compara = [](edge e1, edge e2){return e1.source <= e2.source;};
-	sort(edgelist.begin(), edgelist.end(), compara);
 
 	// Count outgoing sizes -> This can be parallel
 	vector<int> outgoingEdges(n);
