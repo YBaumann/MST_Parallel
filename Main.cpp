@@ -42,7 +42,7 @@ using namespace std;
 
 int main() {
 	ifstream f;
-	f.open("Resources/WattsStrog.txt");
+	f.open("Resources/WattsStrogatz100.txt");
 	vector<edge> edgelist;
 
 	int n; f >> n;

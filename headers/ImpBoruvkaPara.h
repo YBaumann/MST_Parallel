@@ -65,20 +65,19 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> &Pa
 		}
 
 		// Insert propositions into vector
-		PrefixScanVector[2*Tid] = proposalStartEnd[0];
-		PrefixScanVector[2*Tid+1] = proposalStartEnd[1];
-		std::cout << "Proppsal end: " << proposalStartEnd[1].source;nn;
+		PrefixScanVector[2 * Tid] = proposalStartEnd[0];
+		PrefixScanVector[2 * Tid + 1] = proposalStartEnd[1];
 	}
 
 	// now do multiprefix scan, apparently really fast!
-	std::cout << "Start Multi Prefix\n";
 	int differentEdges = 0;
 	multiPrefixScan(PrefixScanVector, differentEdges);
-	std::cout << "Leaves multiP\n";
-
-	for(int i = 0; i < differentEdges; i++){
-		std::cout << PrefixScanVector[i].source << ' ' << PrefixScanVector[i].dest << " " << best.size();nn;
-	}
+	/*
+	for (int i = 0; i < differentEdges; i++)
+	{
+		std::cout << PrefixScanVector[i].source << ' ' << PrefixScanVector[i].dest << " " << best.size();
+		nn;
+	}*/
 
 	// now insert found edges in parallel
 	// The first differentEdges entries of PrefixScanVec hold the edges we need
@@ -93,49 +92,52 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> &Pa
 	std::cout << "Find Parents\n";
 	int newn = n;
 	findParents1(ParentVertex, best, newn);
-	n = newn;
 	// show parents
 	std::cout << "Show parents: \n";
-	for(int i = 0; i < ParentVertex.size(); i++){
+	for (int i = 0; i < ParentVertex.size(); i++)
+	{
 		std::cout << ParentVertex[i] << ' ';
 	}
 	nn;
 
 	// Setup vector to rewrite
-	vector<tuple<int, int, int>> arr(TotalN); // tuple<int,int,int> = ID -> Size -> index
-	for (int i = 0; i < TotalN; i++)
+	vector<tuple<int, int, int>> arr(n); // tuple<int,int,int> = ID -> Size -> index
+	for (int i = 0; i < arr.size(); i++)
 	{
 		arr[i] = make_tuple(ParentVertex[i], outgoingSizes[i], i);
 	}
+	n = newn;
 	vector<int> newIdx(m);
 	for (int i = 0; i < m; i++)
 	{
 		newIdx[i] = i;
 	}
-	vector<int> newSizes;
 
 	// show id
-	std::cout << "Show id->Size: \n";
-	for(int i = 0; i < arr.size(); i++){
-		std::cout << get<0>(arr[i]) << "->" << outgoingSizes[i]<< "  ";
+	std::cout << "Before id->Size: \n";
+	for (int i = 0; i < arr.size(); i++)
+	{
+		std::cout << get<0>(arr[i]) << "->" << outgoingSizes[i] << "  ";
 	}
 	nn;
 	std::cout << "Rewrite\n";
 	// Get new Indices
+	vector<int> newSizes;
 	rewriteVec(arr, newIdx, newSizes);
+
 	outgoingSizes = newSizes;
 
 	std::cout << "NewSize: \n";
-	for(int i = 0; i < arr.size(); i++){
-		std::cout << newSizes[i]<< "  ";
+	for (int i = 0; i < newSizes.size(); i++)
+	{
+		std::cout << newSizes[i] << "  ";
 	}
 	nn;
 
-	
-
 	// show new idx
 	std::cout << "new idx: \n";
-	for(int i = 0; i < newIdx.size(); i++){
+	for (int i = 0; i < newIdx.size(); i++)
+	{
 		std::cout << newIdx[i] << ' ';
 	}
 	nn;
@@ -149,29 +151,55 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> &Pa
 		edgelist[i] = edgelist2[newIdx[i]];
 	}
 
-
 	// Rename edges, to their supervertex
 	for (int i = 0; i < edgelist.size(); i++)
 	{
 		edgelist[i].source = ParentVertex[edgelist[i].source];
 		edgelist[i].dest = ParentVertex[edgelist[i].dest];
 	}
-	
 
 	// Insert found edges into mst
 	std::cout << "New Edges: \n";
 	for (int i = 0; i < best.size(); i++)
 	{
-		if(best[i].weight > 0){
+		if (best[i].weight > 0)
+		{
 			mst.insert(best[i].idx);
 			std::cout << best[i].weight << ' ';
 		}
 	}
 	nn;
 
+	// Create map to new vertex ids -> TODO Parallelize
+	std::cout << "Create Map: \n";
+	vector<int> mapper(TotalN, -1);
+	int sum = 0;
+	for (int i = 0; i < outgoingSizes.size(); i++)
+	{
+		mapper[edgelist[sum].source] = i;
+		sum += outgoingSizes[i];
+	}
+
+	std::cout << "Found mapping: \n";
+	for (int i = 0; i < mapper.size(); i++)
+	{
+		std::cout << mapper[i] << ' ';
+	}
+	nn;
+
+	// Rename Edgelist again
+	for (int i = 0; i < edgelist.size(); i++)
+	{
+		edgelist[i].source = mapper[edgelist[i].source];
+		edgelist[i].dest = mapper[edgelist[i].dest];
+	}
+
 	std::cout << "finishes loop\n";
-	for(int i = 0; i < edgelist.size(); i++){
-		std::cout << edgelist[i].source << " " << edgelist[i].dest << ' ' << edgelist[i].weight;nn;
+	std::cout << "Next Edgelist\n";
+	for (int i = 0; i < edgelist.size(); i++)
+	{
+		std::cout << edgelist[i].source << " " << edgelist[i].dest << ' ' << edgelist[i].weight;
+		nn;
 	}
 }
 
@@ -185,44 +213,46 @@ vector<edge> ParBoruvkaImp(vector<edge> edgelist, vector<int> outgoingSizes, int
 	// get copy of edgelist
 	vector<edge> edgelistcpy = edgelist;
 	set<int> mst;
-
-	// Create ParentVertex Vector
-	vector<int> ParentVertex(n);
-	std::cout << "Assign Parents\n";
-	for (int i = 0; i < n; i++)
-	{
-		ParentVertex[i] = i;
-		std::cout << ParentVertex[i]<< ' '; 
-	}
-	nn;
 	int totalN = n;
 
 	// Steps until only one vertex remains <-> Mst has size n-1
 	while (n > 1)
 	{
-		ImpStep(edgelist, outgoingSizes, ParentVertex, n, m, numThreads, mst,totalN);
+		vector<int> ParentVertex(n);
+		std::cout << "Assign Parents\n";
+		for (int i = 0; i < n; i++)
+		{
+			ParentVertex[i] = i;
+			std::cout << ParentVertex[i] << ' ';
+		}
+		nn;
+		ImpStep(edgelist, outgoingSizes, ParentVertex, n, m, numThreads, mst, totalN);
 		std::cout << "Remaining vertices: " << n;
 		nn;
-		std::cout << "Current mst size: " << mst.size();nn;
+		std::cout << "Current mst size: " << mst.size();
+		nn;
 		std::cout << "Current mst weights: \n";
-		
-		for(int i = 0; i < edgelistcpy.size(); i++){
-			if(mst.count(edgelistcpy[i].idx) && edgelistcpy[i].source < edgelistcpy[i].dest){	
+
+		for (int i = 0; i < edgelistcpy.size(); i++)
+		{
+			if (mst.count(edgelistcpy[i].idx) && edgelistcpy[i].source < edgelistcpy[i].dest)
+			{
 				std::cout << edgelistcpy[i].weight << ' ';
 			}
 		}
 		nn;
-		
 	}
 
 	std::cout << mst.size() << " Get to return\n";
 	vector<edge> mst_res;
 	std::cout << "Now for edges: \n";
-	for(int i = 0; i < edgelistcpy.size(); i++){
-			if(mst.count(edgelistcpy[i].idx) && edgelistcpy[i].source < edgelistcpy[i].dest){	
-				mst_res.push_back(edgelistcpy[i]);
-			}
+	for (int i = 0; i < edgelistcpy.size(); i++)
+	{
+		if (mst.count(edgelistcpy[i].idx) && edgelistcpy[i].source < edgelistcpy[i].dest)
+		{
+			mst_res.push_back(edgelistcpy[i]);
 		}
+	}
 
 	return mst_res;
 }
