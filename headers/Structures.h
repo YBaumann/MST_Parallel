@@ -17,6 +17,15 @@ struct edge {
 	int source, dest, weight, idx;
 	edge(){this->source = 0; this->dest = 0; this->weight = 0; this->idx = 0;}
 	edge(int s,int d,int w,int i) {this->source = s; this->dest = d; this->weight = w; this->idx = i;}
+	bool operator>(const edge& e1) {
+		if(this->weight > e1.weight){
+			return true;
+		} else if(this->weight < e1.weight){
+			return false;
+		} else {
+			return this->source < e1.weight;
+		}
+		}
 };
 
 bool operator<(const edge& e1, const edge& e2) {

@@ -68,17 +68,15 @@ void rewriteVec(vector<tuple<int,int,int>> &arr, vector<int> &toRewrite, vector<
 			numEdgesBefore[prefNewSizes[i]] = newStartIndices[i];
 		}
 	}
-	std::cout << "After Prefix\n";
 	numEdgesBefore[newSize-1] = toRewrite.size();
 	newSizes = vector<int>(newSize);
 	newSizes[0] = numEdgesBefore[0];
-	std::cout << "After Prefix\n";
 	// Calculate exact number of edges and return
 	for(int i = 1; i < newSize; i++){
 		newSizes[i] = numEdgesBefore[i] - numEdgesBefore[i-1];
 	}
 	
-
+	std::cout << "Returns from rewriteVec\n";
 }
 
 

@@ -57,17 +57,13 @@ int main() {
 	}
 	// We add two edges
 	m = 2*m;
-
+	std::cout << "Read everything\n";
 
 	// Sort the edgelist
-	auto compara = [](edge e1, edge e2){return e1.source <= e2.source;};
+	auto compara = [](edge e1, edge e2){return e1.source < e2.source;};
 	sort(edgelist.begin(), edgelist.end(), compara);
 
-	// Print given edgelist:
-	std::cout << "Given edgelist: \n";
-	for(int i = 0; i < edgelist.size(); i++){
-		std::cout << edgelist[i].source << ' ' << edgelist[i].dest << ' ' << edgelist[i].weight;nn;
-	}
+	std::cout << "Passes Sorting\n";
 
 	// Count outgoing sizes -> This can be parallel
 	vector<int> outgoingEdges(n);
@@ -77,7 +73,10 @@ int main() {
 
 	int nrThreads = 2;
 	std::cout << "Calc MST\n";
+	startTimer;
 	vector<edge> sol = ParBoruvkaImp(edgelist, outgoingEdges, n, m, nrThreads);
+	endTimer;
+	printTime;
 	int parRes = 0;
 	for(auto e : sol){
 		parRes += e.weight;
