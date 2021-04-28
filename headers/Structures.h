@@ -23,7 +23,7 @@ struct edge {
 		} else if(this->weight < e1.weight){
 			return false;
 		} else {
-			return this->source < e1.weight;
+			return this->idx > e1.idx;
 		}
 		}
 };

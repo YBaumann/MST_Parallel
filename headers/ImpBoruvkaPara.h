@@ -9,12 +9,12 @@ void checkEdgelist(vector<edge> edgelist, int n, int m){
 	}
 }
 
-void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> &ParentVertex, int &n, int m, int numThreads, set<int> &mst, int TotalN)
+void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> ParentVertex, int &n, int m, int numThreads, set<int> &mst, int TotalN)
 {
 
 	// Datastructures
-	vector<edge> best(TotalN);
-	vector<edge> PrefixScanVector(2 * numThreads);
+	vector<edge> best(n);
+	vector<edge> PrefixScanVector(2 * numThreads, edge(-1,-1,0,0));
 
 	// Divide Workload per processor
 	int workloadPerProcessor = m / numThreads;
@@ -27,15 +27,13 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> &Pa
 		int Tid = tr;
 		int startWL = Tid * workloadPerProcessor;	  // included
 		int endWL = (Tid + 1) * workloadPerProcessor; // not included
-		std::cout << startWL << ' ' << endWL;
-		nn;
 		if (Tid == numThreads - 1)
 		{
 			endWL = edgelist.size();
 		}
 
 		// Find best edges for all vertices
-		vector<edge> proposalStartEnd(2); // first entry is proposal for start, second entry is proposal for end
+		vector<edge> proposalStartEnd(2, edge(0,0,0,0)); // first entry is proposal for start, second entry is proposal for end
 		for (int i = startWL; i < endWL; i++)
 		{
 			edge e = edgelist[i];
@@ -52,19 +50,18 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> &Pa
 
 			if (e.source == startVertexIndices)
 			{ // proposal coliding start
-				if (proposalStartEnd[0].weight == 0 || (proposalStartEnd[0] > e))
+				if (proposalStartEnd[0] > e || proposalStartEnd[0].weight == 0)
 				{
 					proposalStartEnd[0] = e;
 				}
 			}
-			if (e.source == endVertexIndices)
+			else if (e.source == endVertexIndices)
 			{ // Proposal coliding end
-				if (proposalStartEnd[1].weight == 0 || (proposalStartEnd[1] > e))
+				if (proposalStartEnd[1] > e || proposalStartEnd[1].weight == 0)
 				{
 					proposalStartEnd[1] = e;
 				}
-			}
-			if (e.source != endVertexIndices && e.source != startVertexIndices)
+			} else if (e.source < endVertexIndices && e.source > startVertexIndices)
 			{ // non coliding
 				if (best[e.source].weight == 0 || (best[e.source] > e))
 				{
@@ -74,8 +71,9 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> &Pa
 		}
 
 		// Insert propositions into vector
-		PrefixScanVector[2 * Tid] = proposalStartEnd[0];
-		PrefixScanVector[2 * Tid + 1] = proposalStartEnd[1];
+		PrefixScanVector[2 * tr] = proposalStartEnd[0];
+		PrefixScanVector[2 * tr + 1] = proposalStartEnd[1];
+		std::cout << "Props: " << PrefixScanVector[2*tr].source << ' ' << PrefixScanVector[2*tr + 1].source;nn;
 	}
 
 	// now do multiprefix scan, apparently really fast!
@@ -85,15 +83,25 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> &Pa
 	// now insert found edges in parallel
 	// The first differentEdges entries of PrefixScanVec hold the edges we need
 
-#pragma omp parallel for
+	int InsertWeights = 0;
+
 	for (int i = 0; i < differentEdges; i++)
 	{
 		best[PrefixScanVector[i].source] = PrefixScanVector[i];
 	}
 
+	for(int i = 0; i < best.size();i++){
+		//std::cout << best[i].idx << ' ';
+		InsertWeights += best[i].weight;
+	}
+	nn;
+
+	std::cout << "Weights from Best: " << InsertWeights;nn;
+
 	// Find Parent Vertex of all vertices
 	int newn = n;
 	findParents1(ParentVertex, best, newn);
+
 
 	// Setup vector to rewrite
 	vector<tuple<int, int, int>> arr(n); // tuple<int,int,int> = ID -> Size -> index
@@ -111,7 +119,15 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> &Pa
 	vector<int> newSizes;
 	rewriteVec(arr, newIdx, newSizes);
 
+	// Count different Indices
+	set<int>parents;
+	for(auto e : ParentVertex){
+		parents.insert(e);
+	}
+	std::cout << "There should remain this many vertices: " << parents.size() << ' ' << newn;nn;
+
 	outgoingSizes = newSizes;
+	std::cout << "New Sizes: " << newSizes.size();nn;
 
 	// Write egelist to new Indices
 	vector<edge> edgelist2(edgelist.size());
@@ -130,7 +146,6 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> &Pa
 	}
 
 	// Insert found edges into mst
-
 	for (int i = 0; i < best.size(); i++)
 	{
 		if (best[i].weight > 0)
@@ -142,34 +157,17 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> &Pa
 
 	// Create map to new vertex ids -> TODO Parallelize
 	vector<int> mapper(n);
-	n = newn;
+	n = newSizes.size();
 	long long sum = 0;
 	std::cout << "Gets to mapping\n";
 	for (int i = 0; i < outgoingSizes.size(); i++)
 	{
 		assert(sum < edgelist.size() && "Sum was too big");
-		// assert(mapper.size() > edgelist[sum].source && "Mapper didnt cover all remaining vertices!");
-		if(TotalN <= edgelist[sum].source){
-			std::cout << "Outgoing Size: " << outgoingSizes.size();nn;
-			std::cout << "Mapper Size: " << mapper.size();nn;
-			std::cout << "edgelist[sum].source: " << edgelist[sum].source; nn;
-			std::cout << "i: " << i;
-			exit(1);
-		}
 		if(outgoingSizes[i] > 0){
 		mapper[edgelist[sum].source] = i;
 		sum += outgoingSizes[i];
 		}
 	}
-
-	// Print mapping
-	std::cout << "n: " << n << "\nPrint Mapping: \n";
-	for(int i = 0; i < mapper.size(); i++){
-		if(mapper[i] > 0){
-		//std::cout << mapper[i] << ' ';
-		}
-	}
-	nn;
 
 	std::cout << "Gets to rename edgelist\n";
 	// Rename Edgelist again
@@ -178,7 +176,7 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> &Pa
 		edgelist[i].source = mapper[edgelist[i].source];
 		edgelist[i].dest = mapper[edgelist[i].dest];
 	}
-	std::cout << "fininshes Step\n";
+	std::cout << "finishes Step\n";
 }
 
 // ParBoruvkaImp(sol, edgelist, outgoingEdges, n, m)
@@ -197,7 +195,9 @@ vector<edge> ParBoruvkaImp(vector<edge> edgelist, vector<int> outgoingSizes, int
 	// Steps until only one vertex remains <-> Mst has size n-1
 	while (n > 1)
 	{
+		
 		std::cout << "Remaining Vertices: " << n;nn;
+		std::cout << "Remaining Edges: " << m;nn;
 		vector<int> ParentVertex(n);
 		for (int i = 0; i < n; i++)
 		{
@@ -206,16 +206,29 @@ vector<edge> ParBoruvkaImp(vector<edge> edgelist, vector<int> outgoingSizes, int
 		// Check edgelist
 		checkEdgelist(edgelist, n, m);
 		ImpStep(edgelist, outgoingSizes, ParentVertex, n, m, numThreads, mst, totalN);
+		int weight = 0;
+		for (int i = 0; i < edgelistcpy.size(); i++)
+	{
+		if (mst.count(edgelistcpy[i].idx) && edgelistcpy[i].source < edgelistcpy[i].dest)
+		{
+			weight += edgelistcpy[i].weight;
+		}
+	}
+		std::cout << "Current MST weight: " << weight;nn;
+		std::cout << "Current MST Size: " << mst.size();nn;
 	}
 
 	vector<edge> mst_res;
+	std::cout << "Final MST Par: \n";
 	for (int i = 0; i < edgelistcpy.size(); i++)
 	{
 		if (mst.count(edgelistcpy[i].idx) && edgelistcpy[i].source < edgelistcpy[i].dest)
 		{
+			//std::cout << edgelistcpy[i].idx << ' ';
 			mst_res.push_back(edgelistcpy[i]);
 		}
 	}
+	nn;
 
 	return mst_res;
 }

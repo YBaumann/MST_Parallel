@@ -42,11 +42,12 @@ using namespace std;
 
 int main() {
 	ifstream f;
-	f.open("Resources/WattsStrogatz100.txt");
+	f.open("Resources/WattsStrogatz100K.txt");
 	vector<edge> edgelist;
-
+	vector<edge> edgelistSingle;
 	int n; f >> n;
 	int m; f >> m;
+	int nSafe = n;
 	for (int i = 0; i < m; i++) {
 		edge e1 = edge(0,0,0,0);
 		e1.idx = i;
@@ -54,8 +55,11 @@ int main() {
 		edge e2 = edge(e1.dest,e1.source, e1.weight, e1.idx);
 		edgelist.push_back(e1);
 		edgelist.push_back(e2);
+		edgelistSingle.push_back(e1);
+		assert(e1.weight > 0 && "Weights may not be 0");
 	}
 	// We add two edges
+	int msingle = m;
 	m = 2*m;
 	std::cout << "Read everything\n";
 
@@ -70,19 +74,26 @@ int main() {
 	for(int i = 0; i < m; i++){
 		outgoingEdges[edgelist[i].source]++;
 	}
+	std::cout << "Edge Size: " << outgoingEdges[0];nn; 
 
-	int nrThreads = 2;
+	int nrThreads = 1;
 	std::cout << "Calc MST\n";
-	startTimer;
-	vector<edge> sol = ParBoruvkaImp(edgelist, outgoingEdges, n, m, nrThreads);
-	endTimer;
-	printTime;
+	vector<edge> solp = ParBoruvkaImp(edgelist, outgoingEdges, n, m, nrThreads);
+	nn;nn;
+	vector<edge> sols = MinimumSpanningTreeBoruvkaSeq(edgelistSingle, n, msingle);
+	assert(is_Connected(sols, nSafe) && "Solution seq is not connected");
+	assert(is_Connected(solp, nSafe) && "Solution par is not connected");
 	int parRes = 0;
-	for(auto e : sol){
+	for(auto e : solp){
 		parRes += e.weight;
+	}
+	int seqRes = 0;
+	for(auto e : sols){
+		seqRes += e.weight;
 	}
 	nn;
 	std::cout << "ImpBor: " << parRes;nn;
+	std::cout << "SeqBor: " << seqRes;nn;
 
 	return 0;
 }

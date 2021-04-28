@@ -155,10 +155,9 @@ vector<edge> MinimumSpanningTreeBoruvkaPar(vector<edge> edgelist, int n, int m, 
 	
 	// Steps until only one vertex remains <-> Mst has size n-1
 	while (n > 1){
+		std::cout << n;nn;
 		BoruvkaStepPar(edgelistCopy, ParentVertex, mst, n, m, totalN, numThreads);
-    	
 	}
-	exit(1);
 	set<int> s;
 	for(auto e : edgelistCopy){
 		s.insert(e.dest); s.insert(e.source);

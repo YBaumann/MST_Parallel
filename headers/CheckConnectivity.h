@@ -3,7 +3,7 @@
 
 // we do a simple BFS to check connectivity!
 
-bool is_Connected(vector<edge> edgeList, int n, int m) {
+bool is_Connected(vector<edge> edgeList, int n) {
 	vector<vector<int>> adjlist(n);
 	for (int i = 0; i < n;i++) {
 		vector<int> f;
@@ -29,11 +29,14 @@ bool is_Connected(vector<edge> edgeList, int n, int m) {
 		}
 	}
 	
-	for (int i = 0; i < n;i++) {
+	bool ret = true;
+
+	for (int i = 0; i < n; i++) {
 		if (!reachable[i]) {
-			return false;
+			std::cout << "Vertex: " << i << " is not connected\n";
+			ret = false;
 		}
 	}
 
-	return true;
+	return ret;
 }
