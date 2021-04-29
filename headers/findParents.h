@@ -21,14 +21,10 @@ void findParents1(vector<int> &ParentVertex, vector<edge> best, int &n){
         }
     }
 
-    for(int it = 0; it < std::log(best.size())+100; it++){
-        if(it % 1000 == 0){
-            std::cout << it << endl;
-        }
+    for(int it = 0; it < std::log(best.size())+10; it++){
         #pragma omp parallel for
         for(int i = 0; i < ParentVertex.size(); i++){
             ParentVertex[i] = best[ParentVertex[i]].dest;
         }
     }
-    std::cout << "Leaves\n";
 }

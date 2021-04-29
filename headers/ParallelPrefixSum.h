@@ -34,11 +34,6 @@ void prefixPar(vector<int> &prefix, vector<vector<edge>> &adjArr){
         }
     }
 
-    for(int i = 0; i < prefix.size(); i++){
-        std::cout << prefix[i] << ' ';
-    }
-    nn;
-
     // DownSweep
     prefix[n-1] = 0;
     for(int d = log(n)-1; d >= 0; d--){
@@ -48,11 +43,6 @@ void prefixPar(vector<int> &prefix, vector<vector<edge>> &adjArr){
             prefix[k + pow(2,d+1) - 1] = t + prefix[k + pow(2,d+1) - 1];
         }
     }
-
-    for(int i = 0; i < n; i++){
-        std::cout << prefix[i] << ' ';
-    }
-    nn;
 
 
 }

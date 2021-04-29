@@ -22,12 +22,12 @@ using namespace std;
 int main() {
 
 	ofstream f;
-	f.open("Resources/WattsStrogatz200.txt");
+	f.open("Resources/WattsStrogatz1M.txt");
 
 	// It must hold N >> K >> ln N >> 1
 
-	int N = 200; // nodes in Graph
-	int K = 12; // average degree
+	int N = 1000000; // nodes in Graph
+	int K = 120; // average degree
 	double beta = 0.3; // 0 <= beta <= 1!
 
 

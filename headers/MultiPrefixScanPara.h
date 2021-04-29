@@ -18,13 +18,25 @@ we search for smallest value
 */
 
 void merge(vector<edge> &list1, int idx1, vector<edge> &list2, int idx2, vector<int> &sizes){
-    // Runs in O(p)
+    // Merging Lists have same source index
+
+    // One list is empty
+    if(sizes[idx1] == 0){
+        list1 = list2;
+        sizes[idx1] = sizes[idx2];
+        return;
+    }
+    if(sizes[idx2] == 0){
+        return;
+    }
     if(list1[sizes[idx1]-1].source == list2[0].source){
-        list1[sizes[idx1]-1] = list1[sizes[idx1]-1].weight <= list2[0].weight ? list1[sizes[idx1]-1] : list2[0];
+
+        list1[sizes[idx1]-1] = list2[0] > list1[sizes[idx1]-1] ? list1[sizes[idx1]-1] : list2[0];
         for(int i = 1; i < sizes[idx2]; i++){
             list1[sizes[idx1]++] = list2[i];
         }
     } else {
+        // Merging lists that have different vertices
         for(int i = 0; i < sizes[idx2]; i++){
             list1[sizes[idx1]++] = list2[i];
         }
@@ -54,6 +66,11 @@ void multiPrefixScan(vector<edge> &arr, int &foundSize)
     vector<vector<edge>> ArrOfLists;
     ArrOfLists.reserve(arrLen*arrLen);
     vector<int> sizes(arrLen,1);
+    for(int i = 0; i < sizes.size(); i++){
+        if(arr[i].weight <= 0){
+            sizes[i] = 0;
+        }
+    }
 
 
     
@@ -63,7 +80,10 @@ void multiPrefixScan(vector<edge> &arr, int &foundSize)
         ArrOfLists.push_back(f);
     }
 
+
     doScan(ArrOfLists, sizes); // result is saved in position 0 of arrOfLists
+
+   
 
     foundSize = sizes[0];
     arr = ArrOfLists[0];

@@ -31,9 +31,12 @@
 
 // We want the output to be an edgelist with edgeids, sorted
 
-#define startTimer auto t1 = std::chrono::high_resolution_clock::now()
-#define endTimer auto t2 = std::chrono::high_resolution_clock::now()
-#define printTime auto durationSeq = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count(); std::cout << "Time: " << durationSeq / 1000000.0<< " sec\n"
+#define startTimer1 auto t1 = std::chrono::high_resolution_clock::now()
+#define endTimer1 auto t2 = std::chrono::high_resolution_clock::now()
+#define printTime1 auto durationSeq1 = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count(); std::cout << "Time Seq: " << durationSeq1 / 1000000.0<< " sec\n"
+#define startTimer2 auto l1 = std::chrono::high_resolution_clock::now()
+#define endTimer2 auto l2 = std::chrono::high_resolution_clock::now()
+#define printTime2 auto durationSeq2 = std::chrono::duration_cast<std::chrono::microseconds>( l2 - l1 ).count(); std::cout << "Time Par: " << durationSeq2 / 1000000.0<< " sec\n"
 #define nn std::cout << "\n"
 
 using namespace std;
@@ -74,22 +77,39 @@ int main() {
 	for(int i = 0; i < m; i++){
 		outgoingEdges[edgelist[i].source]++;
 	}
-	std::cout << "Edge Size: " << outgoingEdges[0];nn; 
 
-	int nrThreads = 1;
-	std::cout << "Calc MST\n";
+	int nrThreads = 107;
+	startTimer2;
 	vector<edge> solp = ParBoruvkaImp(edgelist, outgoingEdges, n, m, nrThreads);
-	nn;nn;
+	endTimer2;
+	printTime2;
+
+	startTimer1;
 	vector<edge> sols = MinimumSpanningTreeBoruvkaSeq(edgelistSingle, n, msingle);
+	endTimer1;
+	printTime1;
 	assert(is_Connected(sols, nSafe) && "Solution seq is not connected");
 	assert(is_Connected(solp, nSafe) && "Solution par is not connected");
 	int parRes = 0;
+	set<int> seqSet;
+	set<int> parSet;
 	for(auto e : solp){
+		parSet.insert(e.idx);
 		parRes += e.weight;
 	}
 	int seqRes = 0;
 	for(auto e : sols){
+		seqSet.insert(e.idx);
 		seqRes += e.weight;
+	}
+	std::cout << "Par: \n";
+	for(auto e : parSet){
+		//std::cout << e << ' ';
+	}
+	nn;
+	std::cout << "Seq: \n";
+	for(auto e : seqSet){
+		//std::cout << e << ' ';
 	}
 	nn;
 	std::cout << "ImpBor: " << parRes;nn;
