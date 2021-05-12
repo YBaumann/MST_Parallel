@@ -48,8 +48,9 @@ int main() {
 				adjlist[j].insert(i);
 			}
 		}
-		if(i % 100 == 0)
-		std::cout << i;
+		if(i % 100 == 0){
+		std::cout << i;nn;
+		}
 	}
 	std::cout << "further";
 	int edges = 0;

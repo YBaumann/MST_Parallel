@@ -1,4 +1,3 @@
-#pragma once
 
 void checkEdgelist(vector<edge> edgelist, int n, int m){
 	assert(m == edgelist.size() && "Edgelist has too many edges");
@@ -11,7 +10,6 @@ void checkEdgelist(vector<edge> edgelist, int n, int m){
 
 void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> ParentVertex, int &n, int m, int numThreads, set<int> &mst, int TotalN)
 {
-
 	// Datastructures
 	vector<edge> best(n, edge(0,0,0,0));
 	vector<edge> PrefixScanVector(2 * numThreads, edge(0,0,0,0));
@@ -19,8 +17,9 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 	// Divide Workload per processor
 	int workloadPerProcessor = m / numThreads;
 	int workloadLastProcessor = m - ((numThreads - 1) * workloadPerProcessor);
-
 	// Find best edge for each vector
+
+
 #pragma omp parallel for
 	for (int tr = 0; tr < numThreads; tr++)
 	{
@@ -29,7 +28,7 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 		int endWL = (Tid + 1) * workloadPerProcessor; // not included
 		if (Tid == numThreads - 1)
 		{
-			endWL = edgelist.size();
+			endWL = m;
 		}
 		// Find best edges for all vertices
 		vector<edge> proposalStartEnd(2, edge(0,0,0,0)); // first entry is proposal for start, second entry is proposal for end
@@ -75,55 +74,48 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 	}
 
 	// now do multiprefix scan, apparently really fast!
+
 	int differentEdges = 0;
 	multiPrefixScan(PrefixScanVector, differentEdges);
-
 	// now insert found edges in parallel
 	// The first differentEdges entries of PrefixScanVec hold the edges we need
 
 	int InsertWeights = 0;
-	nn;
+
+#pragma omp parallel for
 	for (int i = 0; i < differentEdges; i++)
 	{
 		if(PrefixScanVector[i].weight > 0){
 			best[PrefixScanVector[i].source] = PrefixScanVector[i];
 		}
 	}
+
 	// Find Parent Vertex of all vertices
 	int newn = n;
 	findParents1(ParentVertex, best, newn);
 
-
 	// Setup vector to rewrite
 	vector<tuple<int, int, int>> arr(n); // tuple<int,int,int> = ID -> Size -> index
-	for (int i = 0; i < arr.size(); i++)
+#pragma omp parallel for
+	for (int i = 0; i < n; i++)
 	{
 		arr[i] = make_tuple(ParentVertex[i], outgoingSizes[i], i);
 	}
-	vector<int> newIdx(m);
-
-#pragma omp parallel for
-	for (int i = 0; i < m; i++)
-	{
-		newIdx[i] = i;
-	}
 
 	// Get new Indices
+	vector<int> newIdx;
+	newIdx.reserve(m);
 	vector<int> newSizes;
-	std::cout << "Timing for rewriting: \n";
-	startTimer;
-	rewriteVec(arr, newIdx, newSizes);
-	endTimer;
-	printTime;
+	rewriteVec(arr, newIdx, newSizes,numThreads,m);
 	// Count different Indices
 	outgoingSizes = newSizes;
 
-	// Write egelist to new Indices
-	vector<edge> edgelist2(edgelist.size());
+	// Write edgelist to new Indices
+	vector<edge> edgelist2(m);
 	edgelist2 = edgelist;
 
 #pragma omp parallel for
-	for (int i = 0; i < edgelist.size(); i++)
+	for (int i = 0; i < m; i++)
 	{
 		edge e = edgelist2[newIdx[i]];
 		e.source = ParentVertex[e.source];
@@ -132,7 +124,8 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 	}
 
 	// Insert found edges into mst
-	for (int i = 0; i < best.size(); i++)
+	
+	for (int i = 0; i < n; i++)
 	{
 		if (best[i].weight > 0)
 		{
@@ -165,9 +158,9 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 // ParBoruvkaImp(sol, edgelist, outgoingEdges, n, m)
 vector<edge> ParBoruvkaImp(vector<edge> edgelist, vector<int> outgoingSizes, int n, int m, int numThreads)
 {
-	// OMP Design
-	assert(numThreads < n && "behaves strangely if more processors than nodes!");
 	omp_set_num_threads(numThreads);
+	// OMP Design
+	assert(numThreads < n && m == edgelist.size() &&  "behaves strangely if more processors than nodes!");
 
 	std::cout << "Before Copy of edgelist\n";
 	// get copy of edgelist
@@ -178,8 +171,9 @@ vector<edge> ParBoruvkaImp(vector<edge> edgelist, vector<int> outgoingSizes, int
 	// Steps until only one vertex remains <-> Mst has size n-1
 	while (n > 1)
 	{
-		
+
 		vector<int> ParentVertex(n);
+	#pragma omp parallel for
 		for (int i = 0; i < n; i++)
 		{
 			ParentVertex[i] = i;
@@ -189,21 +183,15 @@ vector<edge> ParBoruvkaImp(vector<edge> edgelist, vector<int> outgoingSizes, int
 		//std::cout << n << ' ';
 	}
 
-	std::cout << "Time for MST Writeback:\n";
-	startTimer;
 	vector<edge> mst_res;
-	for (int i = 0; i < edgelistcpy.size(); i++)
+
+	for (int i = 0; i < m; i++)
 	{
-		if (mst.count(edgelistcpy[i].idx) && edgelistcpy[i].source < edgelistcpy[i].dest)
+		if (edgelistcpy[i].source < edgelistcpy[i].dest && mst.count(edgelistcpy[i].idx))
 		{
 			mst_res.push_back(edgelistcpy[i]);
 		}
 	}
-	endTimer;
-	printTime;
-
-	std::cout << "MST_Size: " << mst_res.size();
-	nn;
 
 	return mst_res;
 }

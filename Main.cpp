@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <map>
 #include <cstdio>
 #include <iostream>
 #include <fstream>
@@ -11,23 +12,37 @@
 #include <chrono>
 #include <math.h>
 
+#define TimerStart a1 = std::chrono::high_resolution_clock::now()
+#define TimerEnd a2 = std::chrono::high_resolution_clock::now()
+#define getTime (double)std::chrono::duration_cast<std::chrono::microseconds>( a2 - a1 ).count() / 1000000.0
 
-#include "headers\Prefix.h"
-#include "headers\PrefixAnySize.h"
-#include "headers\vectorOperations.h"
-#include "headers\FindCorrectPlace.h"
-#include "headers\Structures.h"
-#include "headers\CSR_Format.h"
-#include "headers\EdgelistToAdjArray.h"
-#include "headers\BoruvkaSeq.h"
-#include "headers\KruskalSeq.h"
-#include "headers\CheckConnectivity.h"
-#include "headers\PrimSeq.h" 
-#include "headers\SequentialCutoff.h"
-#include "headers\BoruvkaPara.h"
-#include "headers\rewriteVector.h"
-#include "headers\ImpBoruvkaPara.h"
-#include "headers\TestCases.h"
+using namespace std;
+
+// Timing stuff
+vector<pair<string,double>> times;
+map<string,double> timesMap;
+vector<string> toMap = {"rewrite","Calc Best"};
+
+std::chrono::_V2::system_clock::time_point a1;
+std::chrono::_V2::system_clock::time_point a2;
+
+
+#include "headers/Prefix.h"
+#include "headers/PrefixAnySize.h"
+#include "headers/vectorOperations.h"
+#include "headers/FindCorrectPlace.h"
+#include "headers/Structures.h"
+#include "headers/CSR_Format.h"
+#include "headers/EdgelistToAdjArray.h"
+#include "headers/BoruvkaSeq.h"
+#include "headers/KruskalSeq.h"
+#include "headers/CheckConnectivity.h"
+#include "headers/PrimSeq.h" 
+#include "headers/SequentialCutoff.h"
+#include "headers/BoruvkaPara.h"
+#include "headers/rewriteVector.h"
+#include "headers/ImpBoruvkaPara.h"
+#include "headers/TestCases.h"
 
 // We want the output to be an edgelist with edgeids, sorted
 
@@ -39,15 +54,20 @@
 #define printTime2 auto durationSeq2 = std::chrono::duration_cast<std::chrono::microseconds>( l2 - l1 ).count(); std::cout << "Time Par: " << durationSeq2 / 1000000.0<< " sec\n"
 #define nn std::cout << "\n"
 
-using namespace std;
 
 
 
 int main() {
+	// Setup I/O and timing
 	ifstream f;
-	f.open("Resources/WattsStrogatz100K.txt");
+	f.open("Resources/WattsStrog.txt");
 	vector<edge> edgelist;
 	vector<edge> edgelistSingle;
+	for(auto e : toMap){
+		timesMap.insert(make_pair(e,0));
+	}
+
+
 	int n; f >> n;
 	int m; f >> m;
 	int nSafe = n;
@@ -78,16 +98,16 @@ int main() {
 		outgoingEdges[edgelist[i].source]++;
 	}
 
-	int nrThreads = 107;
-	startTimer2;
+	int nrThreads = 4;
+	TimerStart;
 	vector<edge> solp = ParBoruvkaImp(edgelist, outgoingEdges, n, m, nrThreads);
-	endTimer2;
-	printTime2;
+	TimerEnd;
+	times.push_back(make_pair("Parallel Runtime", getTime));
 
-	startTimer1;
+	TimerStart;
 	vector<edge> sols = MinimumSpanningTreeBoruvkaSeq(edgelistSingle, n, msingle);
-	endTimer1;
-	printTime1;
+	TimerEnd;
+	times.push_back(make_pair("Sequential Runtime", getTime));
 	assert(is_Connected(sols, nSafe) && "Solution seq is not connected");
 	assert(is_Connected(solp, nSafe) && "Solution par is not connected");
 	int parRes = 0;
@@ -102,18 +122,17 @@ int main() {
 		seqSet.insert(e.idx);
 		seqRes += e.weight;
 	}
-	std::cout << "Par: \n";
-	for(auto e : parSet){
-		//std::cout << e << ' ';
-	}
-	nn;
-	std::cout << "Seq: \n";
-	for(auto e : seqSet){
-		//std::cout << e << ' ';
-	}
-	nn;
+
 	std::cout << "ImpBor: " << parRes;nn;
 	std::cout << "SeqBor: " << seqRes;nn;
+	std::cout << "\nTiming:\n--------------------\n";
+	for(auto e : times){
+		std::cout << e.first << " : " << e.second;nn;
+	}
 
+	for(auto e : timesMap){
+		std::cout << e.first << " : " << e.second;nn;
+	}
+	nn;
 	return 0;
 }
