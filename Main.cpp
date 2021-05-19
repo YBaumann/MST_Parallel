@@ -60,7 +60,7 @@ std::chrono::_V2::system_clock::time_point a2;
 int main() {
 	// Setup I/O and timing
 	ifstream f;
-	f.open("Resources/WattsStrog.txt");
+	f.open("Resources/Barabasi100000_12.txt");
 	vector<edge> edgelist;
 	vector<edge> edgelistSingle;
 	for(auto e : toMap){
@@ -100,6 +100,7 @@ int main() {
 
 	int nrThreads = 4;
 	TimerStart;
+	std::cout << "Sttarts\n";
 	vector<edge> solp = ParBoruvkaImp(edgelist, outgoingEdges, n, m, nrThreads);
 	TimerEnd;
 	times.push_back(make_pair("Parallel Runtime", getTime));
