@@ -12,6 +12,14 @@
 #include <chrono>
 #include <math.h>
 
+/*
+To run on cluster do the following:
+
+>>  export OMP_NUM_THREADS=numThreads
+>>  g++ -fopenmp Main.cpp -std=gnu++11
+
+*/
+
 #define TimerStart a1 = std::chrono::high_resolution_clock::now()
 #define TimerEnd a2 = std::chrono::high_resolution_clock::now()
 #define getTime (double)std::chrono::duration_cast<std::chrono::microseconds>( a2 - a1 ).count() / 1000000.0
@@ -60,7 +68,7 @@ std::chrono::_V2::system_clock::time_point a2;
 int main() {
 	// Setup I/O and timing
 	ifstream f;
-	f.open("Resources/WattsStrog.txt");
+	f.open("Resources/WattsStrogatz100K.txt");
 	vector<edge> edgelist;
 	vector<edge> edgelistSingle;
 	for(auto e : toMap){
@@ -98,7 +106,7 @@ int main() {
 		outgoingEdges[edgelist[i].source]++;
 	}
 
-	int nrThreads = 4;
+	int nrThreads = 32;
 	TimerStart;
 	std::cout << "Starts\n";
 	vector<edge> solp = ParBoruvkaImp(edgelist, outgoingEdges, n, m, nrThreads);

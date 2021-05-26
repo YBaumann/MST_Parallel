@@ -8,7 +8,7 @@ void checkEdgelist(vector<edge> edgelist, int n, int m){
 	}
 }
 
-void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> ParentVertex, int &n, int& m, int numThreads, set<int> &mst, int TotalN)
+void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> ParentVertex, int &n, int m, int numThreads, set<int> &mst, int TotalN)
 {
 	// Datastructures
 	vector<edge> best(n, edge(0,0,0,0));
@@ -20,7 +20,6 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 	// Find best edge for each vector
 
 
-	std::cout << "Before loop\n";
 #pragma omp parallel for
 	for (int tr = 0; tr < numThreads; tr++)
 	{
@@ -74,7 +73,6 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 		PrefixScanVector[2 * tr + 1] = proposalStartEnd[1];
 	}
 
-	std::cout << "After Loop\n";
 	// now do multiprefix scan, apparently really fast!
 
 	int differentVertices = 0;
@@ -108,18 +106,13 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 	vector<int> newIdx;
 	newIdx.reserve(m);
 	vector<int> newSizes;
-	std::cout << "Before rewrite\n";
 	rewriteVec(arr, newIdx, newSizes,numThreads,m);
-	std::cout << "After rewrite\n";
 	// Count different Indices
 	outgoingSizes = newSizes;
 
 	// Write edgelist to new Indices
 	vector<edge> edgelist2(m);
 	edgelist2 = edgelist;
-	std::cout << "M: " << m << ' ' << edgelist2.size();nn;
-
-	std::cout << "Before Parvert rewrite\n";
 #pragma omp parallel for
 	for (int i = 0; i < m; i++)
 	{
@@ -129,9 +122,7 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 		edgelist[i] = e;
 	}
 
-
 	// Insert found edges into mst
-	std::cout << "Before insertion\n";
 	
 	for (int i = 0; i < n; i++)
 	{
@@ -140,7 +131,6 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 			mst.insert(best[i].idx);
 		}
 	}
-	std::cout << "Before mapping\n";
 
 	// Create map to new vertex ids -> TODO Parallelize
 	vector<int> mapper(n);
@@ -164,32 +154,8 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 		edgelist[i].source = mapper[edgelist[i].source];
 		edgelist[i].dest = mapper[edgelist[i].dest];
 		edge e = edgelist[i];
-		if(e.source != e.dest){
-			useful[i] = 1;
-		}
 	}
 
-	vector<int> usefulIdx = useful;
-	std::cout << "Before prefix\n";
-
-	ParPrefixAnySize(usefulIdx,useful,numThreads);
-	int newm = usefulIdx[m-1] + 1;
-	nn;
-	std::cout << "newm: " << newm;
-	vector<edge> newedgelist(newm);
-	for(int i = 0; i < m; i++){
-
-		if(useful[i]){
-			newedgelist[usefulIdx[i]] = edgelist[i];
-		}
-	}
-	nn;
-	for(int i = 0; i < newm; i++){
-		//std::cout << newedgelist[i].idx << ' ';
-	}
-	nn;
-	edgelist = newedgelist;
-	m = newm;
 }
 
 
@@ -219,7 +185,6 @@ vector<edge> ParBoruvkaImp(vector<edge> edgelist, vector<int> outgoingSizes, int
 		}
 		//Check edgelist
 		ImpStep(edgelist, outgoingSizes, ParentVertex, n, totalM, numThreads, mst, totalN);
-		nn;nn;
 		//std::cout << n << ' ';
 	}
 
