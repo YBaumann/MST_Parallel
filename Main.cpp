@@ -49,6 +49,7 @@ std::chrono::_V2::system_clock::time_point a2;
 #include "headers/SequentialCutoff.h"
 #include "headers/BoruvkaPara.h"
 #include "headers/rewriteVector.h"
+#include "headers/cutEdgelist.h"
 #include "headers/ImpBoruvkaPara.h"
 #include "headers/TestCases.h"
 
@@ -68,7 +69,7 @@ std::chrono::_V2::system_clock::time_point a2;
 int main() {
 	// Setup I/O and timing
 	ifstream f;
-	f.open("Resources/WattsStrogatz100K.txt");
+	f.open("Resources/Barabasi100.txt");
 	vector<edge> edgelist;
 	vector<edge> edgelistSingle;
 	for(auto e : toMap){

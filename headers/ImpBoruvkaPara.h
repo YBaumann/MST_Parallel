@@ -8,7 +8,7 @@ void checkEdgelist(vector<edge> edgelist, int n, int m){
 	}
 }
 
-void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> ParentVertex, int &n, int m, int numThreads, set<int> &mst, int TotalN)
+void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> ParentVertex, int &n, int &m, int numThreads, set<int> &mst, int TotalN)
 {
 	// Datastructures
 	vector<edge> best(n, edge(0,0,0,0));
@@ -156,6 +156,9 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 		edge e = edgelist[i];
 	}
 
+	// delete Self edges, This can be done more efficient
+	cutEdgelist(edgelist,m);
+
 }
 
 
@@ -173,6 +176,7 @@ vector<edge> ParBoruvkaImp(vector<edge> edgelist, vector<int> outgoingSizes, int
 	set<int> mst;
 	int totalN = n;
 	int totalM = m;
+	std::cout << "Edgelistsize: " << m;nn;
 	// Steps until only one vertex remains <-> Mst has size n-1
 	while (n > 1)
 	{
@@ -185,7 +189,7 @@ vector<edge> ParBoruvkaImp(vector<edge> edgelist, vector<int> outgoingSizes, int
 		}
 		//Check edgelist
 		ImpStep(edgelist, outgoingSizes, ParentVertex, n, totalM, numThreads, mst, totalN);
-		//std::cout << n << ' ';
+		std::cout << "Edgelistsize: " << m << "\n";
 	}
 
 	vector<edge> mst_res;
