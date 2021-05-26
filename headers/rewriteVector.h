@@ -13,7 +13,7 @@ void rewriteVec(vector<tuple<int,int,int>> &arr, vector<int> &toRewrite, vector<
 	vector<int> sizesNewOrder(n);
 	vector<int> oldStartIndices(n);
 	vector<int> newStartIndices(n);
-	vector<int> sol = vector<int>(m);
+	vector<int> sol(m);
 
 
 #pragma omp parallel for
@@ -21,7 +21,7 @@ void rewriteVec(vector<tuple<int,int,int>> &arr, vector<int> &toRewrite, vector<
 		sizesOld[i] = get<1>(arr[i]);
 	}
 	
-	
+	std::cout << "Before Sort\n";
 	// Parallelize this later
 	sort(arr.begin(),arr.end());
 
@@ -64,6 +64,7 @@ void rewriteVec(vector<tuple<int,int,int>> &arr, vector<int> &toRewrite, vector<
 	// get number of vertices in edgelist
 	int newSize = prefNewSizes[n-1] + 1;
 	
+	std::cout << "Before Actual Rewrite\n";
 	// Write number of edges per supervertex into respective index
 	vector<int> numEdgesBefore(newSize);
 #pragma omp parallel for
@@ -72,6 +73,8 @@ void rewriteVec(vector<tuple<int,int,int>> &arr, vector<int> &toRewrite, vector<
 			numEdgesBefore[prefNewSizes[i]] = newStartIndices[i];
 		}
 	}
+
+	std::cout << "After Actual Rewrite\n";
 
 	numEdgesBefore[newSize-1] = m;
 	newSizes = vector<int>(newSize);
