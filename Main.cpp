@@ -23,6 +23,14 @@ To run on cluster do the following:
 #define TimerStart a1 = std::chrono::high_resolution_clock::now()
 #define TimerEnd a2 = std::chrono::high_resolution_clock::now()
 #define getTime (double)std::chrono::duration_cast<std::chrono::microseconds>( a2 - a1 ).count() / 1000000.0
+#define startTimer1 auto t1 = std::chrono::high_resolution_clock::now()
+#define endTimer1 auto t2 = std::chrono::high_resolution_clock::now()
+#define printTime1 auto durationSeq1 = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count(); std::cout << "Time Seq: " << durationSeq1 / 1000000.0<< " sec\n"
+#define startTimer2 auto l1 = std::chrono::high_resolution_clock::now()
+#define endTimer2 auto l2 = std::chrono::high_resolution_clock::now()
+#define printTime2 auto durationSeq2 = std::chrono::duration_cast<std::chrono::microseconds>( l2 - l1 ).count(); std::cout << "Time Par: " << durationSeq2 / 1000000.0<< " sec\n"
+#define nn std::cout << "\n"
+
 
 using namespace std;
 
@@ -55,13 +63,7 @@ std::chrono::_V2::system_clock::time_point a2;
 
 // We want the output to be an edgelist with edgeids, sorted
 
-#define startTimer1 auto t1 = std::chrono::high_resolution_clock::now()
-#define endTimer1 auto t2 = std::chrono::high_resolution_clock::now()
-#define printTime1 auto durationSeq1 = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count(); std::cout << "Time Seq: " << durationSeq1 / 1000000.0<< " sec\n"
-#define startTimer2 auto l1 = std::chrono::high_resolution_clock::now()
-#define endTimer2 auto l2 = std::chrono::high_resolution_clock::now()
-#define printTime2 auto durationSeq2 = std::chrono::duration_cast<std::chrono::microseconds>( l2 - l1 ).count(); std::cout << "Time Par: " << durationSeq2 / 1000000.0<< " sec\n"
-#define nn std::cout << "\n"
+
 
 
 
@@ -69,7 +71,7 @@ std::chrono::_V2::system_clock::time_point a2;
 int main() {
 	// Setup I/O and timing
 	ifstream f;
-	f.open("Resources/Barabasi100.txt");
+	f.open("Resources/BarabasiSparse1M.txt");
 	vector<edge> edgelist;
 	vector<edge> edgelistSingle;
 	for(auto e : toMap){
@@ -107,7 +109,7 @@ int main() {
 		outgoingEdges[edgelist[i].source]++;
 	}
 
-	int nrThreads = 32;
+	int nrThreads = 64;
 	TimerStart;
 	std::cout << "Starts\n";
 	vector<edge> solp = ParBoruvkaImp(edgelist, outgoingEdges, n, m, nrThreads);

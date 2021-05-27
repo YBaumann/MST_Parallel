@@ -31,7 +31,6 @@ void rewriteVec(vector<tuple<int,int,int>> &arr, vector<int> &toRewrite, vector<
 
 	ParPrefixAnySize(oldStartIndices, sizesOld, threadn);
 	ParPrefixAnySize(newStartIndices, sizesNewOrder, threadn);
-
 	// calculate the indices for each edge of the new edgelist
 
 #pragma omp parallel for

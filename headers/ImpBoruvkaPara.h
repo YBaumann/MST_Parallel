@@ -103,10 +103,9 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 	}
 
 	// Get new Indices
-	vector<int> newIdx;
-	newIdx.reserve(m);
+	vector<int> newIdx(m);
 	vector<int> newSizes;
-	rewriteVec(arr, newIdx, newSizes,numThreads,m);
+	rewriteVec(arr, newIdx, newSizes, numThreads,m);
 	// Count different Indices
 	outgoingSizes = newSizes;
 
@@ -123,7 +122,6 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 	}
 
 	// Insert found edges into mst
-	
 	for (int i = 0; i < n; i++)
 	{
 		if (best[i].weight > 0)
@@ -145,8 +143,6 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 		}
 	}
 	// Rename Edgelist again
-	
-	vector<int> useful(m);
 
 #pragma omp parallel for
 	for (int i = 0; i < edgelist.size(); i++)
@@ -157,7 +153,7 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 	}
 
 	// delete Self edges, This can be done more efficient
-	cutEdgelist(edgelist,m);
+	// cutEdgelist(edgelist, outgoingSizes ,m ,n ,numThreads);
 
 }
 
@@ -189,10 +185,11 @@ vector<edge> ParBoruvkaImp(vector<edge> edgelist, vector<int> outgoingSizes, int
 		}
 		//Check edgelist
 		ImpStep(edgelist, outgoingSizes, ParentVertex, n, totalM, numThreads, mst, totalN);
-		std::cout << "Edgelistsize: " << m << "\n";
+		std::cout << "Edgelistsize: " << totalM << "\n";
 	}
 
 	vector<edge> mst_res;
+
 
 	for (int i = 0; i < m; i++)
 	{
