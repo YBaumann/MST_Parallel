@@ -71,7 +71,7 @@ std::chrono::_V2::system_clock::time_point a2;
 int main() {
 	// Setup I/O and timing
 	ifstream f;
-	f.open("Resources/BarabasiSparse1M.txt");
+	f.open("Resources/WattsStrog.txt");
 	vector<edge> edgelist;
 	vector<edge> edgelistSingle;
 	for(auto e : toMap){
@@ -97,6 +97,7 @@ int main() {
 	m = 2*m;
 	std::cout << "Read everything\n";
 
+
 	// Sort the edgelist
 	auto compara = [](edge e1, edge e2){return e1.source < e2.source;};
 	sort(edgelist.begin(), edgelist.end(), compara);
@@ -109,10 +110,11 @@ int main() {
 		outgoingEdges[edgelist[i].source]++;
 	}
 
-	int nrThreads = 64;
+	int nrThreads = 4;
 	TimerStart;
 	std::cout << "Starts\n";
-	vector<edge> solp = ParBoruvkaImp(edgelist, outgoingEdges, n, m, nrThreads);
+	
+	vector<edge> solp = ParBoruvkaImp(edgelist, edgelistSingle, outgoingEdges, n, m, nrThreads);
 	TimerEnd;
 	times.push_back(make_pair("Parallel Runtime", getTime));
 

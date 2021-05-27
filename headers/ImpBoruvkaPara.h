@@ -8,7 +8,7 @@ void checkEdgelist(vector<edge> edgelist, int n, int m){
 	}
 }
 
-void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> ParentVertex, int &n, int &m, int numThreads, set<int> &mst, int TotalN)
+void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> ParentVertex, int &n, int &m, int numThreads, vector<int> &mstOneHot, int TotalN)
 {
 	// Datastructures
 	vector<edge> best(n, edge(0,0,0,0));
@@ -126,7 +126,7 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 	{
 		if (best[i].weight > 0)
 		{
-			mst.insert(best[i].idx);
+			mstOneHot[best[i].idx] = 1;
 		}
 	}
 
@@ -160,16 +160,20 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 
 
 
-vector<edge> ParBoruvkaImp(vector<edge> edgelist, vector<int> outgoingSizes, int n, int m, int numThreads)
+vector<edge> ParBoruvkaImp(vector<edge> edgelist, vector<edge> edgelistSingle, vector<int> outgoingSizes, int n, int m, int numThreads)
 {
 	omp_set_num_threads(numThreads);
+
+	// We store the edges we need in our mst here. At this pount m will always be even!
+	vector<int> mstSol(m/2);
+
+
 	// OMP Design
 	assert(numThreads < n && m == edgelist.size() &&  "behaves strangely if more processors than nodes!");
 
 	std::cout << "Before Copy of edgelist\n";
 	// get copy of edgelist
 	vector<edge> edgelistcpy = edgelist;
-	set<int> mst;
 	int totalN = n;
 	int totalM = m;
 	std::cout << "Edgelistsize: " << m;nn;
@@ -184,18 +188,19 @@ vector<edge> ParBoruvkaImp(vector<edge> edgelist, vector<int> outgoingSizes, int
 			ParentVertex[i] = i;
 		}
 		//Check edgelist
-		ImpStep(edgelist, outgoingSizes, ParentVertex, n, totalM, numThreads, mst, totalN);
+		ImpStep(edgelist, outgoingSizes, ParentVertex, n, totalM, numThreads, mstSol, totalN);
 		std::cout << "Edgelistsize: " << totalM << "\n";
 	}
 
-	vector<edge> mst_res;
+	vector<edge> mst_res(totalN-1);
+	vector<int> mst_Indices;
 
+	ParPrefixAnySize(mst_Indices, mstSol ,numThreads);
 
-	for (int i = 0; i < m; i++)
-	{
-		if (edgelistcpy[i].source < edgelistcpy[i].dest && mst.count(edgelistcpy[i].idx))
-		{
-			mst_res.push_back(edgelistcpy[i]);
+#pragma omp parallel for
+	for(int i = 0; i <  totalM / 2 ;i++){
+		if(mstSol[i] == 1){
+			mst_res[mst_Indices[i]] = edgelistSingle[i];
 		}
 	}
 
