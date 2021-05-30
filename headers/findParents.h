@@ -8,22 +8,20 @@
 
 void findParents1(vector<int> &ParentVertex, vector<edge> best, int &n){
     n = 0;
-
-    // We need to have consensus on n, this has O(n) timesteps
+    int bestSize = best.size();
+    // We need to have consensus on n, this has O(n/p) timesteps
     #pragma omp parallel for ordered
-    for(int i = 0; i < best.size(); i++){
+    for(int i = 0; i < bestSize; i++){
         if(best[best[i].dest].dest == best[i].source && best[i].source < best[i].dest && best[i].weight > 0){
             best[i].dest = best[i].source;
-            #pragma omp ordered
-            {
-                n++;
-            }
         }
     }
+    int PSize = ParentVertex.size();
 
-    for(int it = 0; it < std::log(best.size())+10; it++){
+    int logBS = std::log(bestSize);
+    for(int it = 0; it < logBS+5; it++){
         #pragma omp parallel for
-        for(int i = 0; i < ParentVertex.size(); i++){
+        for(int i = 0; i < PSize; i++){
             ParentVertex[i] = best[ParentVertex[i]].dest;
         }
     }

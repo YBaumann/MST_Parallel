@@ -23,6 +23,9 @@ To run on cluster do the following:
 #define TimerStart a1 = std::chrono::high_resolution_clock::now()
 #define TimerEnd a2 = std::chrono::high_resolution_clock::now()
 #define getTime (double)std::chrono::duration_cast<std::chrono::microseconds>( a2 - a1 ).count() / 1000000.0
+#define TS b1 = std::chrono::high_resolution_clock::now()
+#define TE b2 = std::chrono::high_resolution_clock::now()
+#define gT (double)std::chrono::duration_cast<std::chrono::microseconds>( b2 - b1 ).count() / 1000000.0
 #define startTimer1 auto t1 = std::chrono::high_resolution_clock::now()
 #define endTimer1 auto t2 = std::chrono::high_resolution_clock::now()
 #define printTime1 auto durationSeq1 = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count(); std::cout << "Time Seq: " << durationSeq1 / 1000000.0<< " sec\n"
@@ -35,15 +38,21 @@ To run on cluster do the following:
 using namespace std;
 
 // Timing stuff
+// To get times insert into timesmap
 vector<pair<string,double>> times;
 map<string,double> timesMap;
-vector<string> toMap = {"rewrite","Calc Best"};
+vector<string> toMap = {"Calc Best","Multi Pref","Find Parents","Rewrite Vector","Rename to Supervertex","Insert into MST","Resort edgelist","cutoff","Return MST"};
 
 std::chrono::_V2::system_clock::time_point a1;
 std::chrono::_V2::system_clock::time_point a2;
 
+std::chrono::_V2::system_clock::time_point b1;
+std::chrono::_V2::system_clock::time_point b2;
 
+
+#include "headers/parasort.h"
 #include "headers/Prefix.h"
+#include "headers/ParAggregate.h"
 #include "headers/PrefixAnySize.h"
 #include "headers/vectorOperations.h"
 #include "headers/FindCorrectPlace.h"
@@ -71,7 +80,7 @@ std::chrono::_V2::system_clock::time_point a2;
 int main() {
 	// Setup I/O and timing
 	ifstream f;
-	f.open("Resources/WattsStrog.txt");
+	f.open("Resources/BarabasiSparse1M3E.txt");
 	vector<edge> edgelist;
 	vector<edge> edgelistSingle;
 	for(auto e : toMap){
@@ -110,11 +119,11 @@ int main() {
 		outgoingEdges[edgelist[i].source]++;
 	}
 
-	int nrThreads = 4;
+	int nrThreads = 64;
 	TimerStart;
 	std::cout << "Starts\n";
-	
-	vector<edge> solp = ParBoruvkaImp(edgelist, edgelistSingle, outgoingEdges, n, m, nrThreads);
+	int cutoff = 50;
+	vector<edge> solp = ParBoruvkaImp(edgelist, edgelistSingle, outgoingEdges, n, m, nrThreads, cutoff);
 	TimerEnd;
 	times.push_back(make_pair("Parallel Runtime", getTime));
 
@@ -143,7 +152,7 @@ int main() {
 	for(auto e : times){
 		std::cout << e.first << " : " << e.second;nn;
 	}
-
+	std::cout << "\nBreakdown:\n--------------------\n";
 	for(auto e : timesMap){
 		std::cout << e.first << " : " << e.second;nn;
 	}
