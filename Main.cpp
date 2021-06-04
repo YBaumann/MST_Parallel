@@ -144,7 +144,7 @@ int main() {
 	for(auto e : sols){
 		seqSet.insert(e.idx);
 		seqRes += e.weight;
-	}
+	} 
 
 	std::cout << "ImpBor: " << parRes;nn;
 	std::cout << "SeqBor: " << seqRes;nn;
