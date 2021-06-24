@@ -83,7 +83,7 @@ std::chrono::_V2::system_clock::time_point b2;
 int main() {
 	// Setup I/O and timing
 	ifstream f;
-	f.open("Resources/WattsStrogatz100.txt");
+	f.open("Resources/WattsStrogatz100K.txt");
 	vector<edge> edgelist;
 	vector<edge> edgelistSingle;
 	for(auto e : toMap){
@@ -125,7 +125,7 @@ int main() {
 	int nrThreads = 32;
 	TimerStart;
 	std::cout << "Starts\n";
-	int cutoff = 10;
+	int cutoff = 100;
 	vector<edge> solp = ParBoruvkaImp(edgelist, edgelistSingle, outgoingEdges, n, m, nrThreads, cutoff);
 	TimerEnd;
 	times.push_back(make_pair("Parallel Runtime", getTime));
@@ -134,8 +134,8 @@ int main() {
 	vector<edge> sols = MinimumSpanningTreeBoruvkaSeq(edgelistSingle, n, msingle);
 	TimerEnd;
 	times.push_back(make_pair("Sequential Runtime", getTime));
-	//assert(is_Connected(sols, nSafe) && "Solution seq is not connected");
-	//assert(is_Connected(solp, nSafe) && "Solution par is not connected");
+	assert(is_Connected(sols, nSafe) && "Solution seq is not connected");
+	assert(is_Connected(solp, nSafe) && "Solution par is not connected");
 	int parRes = 0;
 	set<int> seqSet;
 	set<int> parSet;

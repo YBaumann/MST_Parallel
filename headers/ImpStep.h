@@ -9,6 +9,7 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 	int workloadLastProcessor = m - ((numThreads - 1) * workloadPerProcessor);
 	// Find best edge for each vector
 
+	TS;
 #pragma omp parallel for
 	for (int tr = 0; tr < numThreads; tr++)
 	{
@@ -61,17 +62,21 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 		PrefixScanVector[2 * tr] = proposalStartEnd[0];
 		PrefixScanVector[2 * tr + 1] = proposalStartEnd[1];
 	}
+	TE;
+	timesMap["Calc Best"] += gT;
 
 	// now do multiprefix scan, apparently really fast!
 
+	TS;
 	int differentVertices = 0;
 	multiPrefixScan(PrefixScanVector, differentVertices);
 	// now insert found edges in parallel
 	// The first differentEdges entries of PrefixScanVec hold the edges we need
-
+	TE;
+	timesMap["Multi Pref"] += gT;
 
 	int InsertWeights = 0;
-
+	TS;
 
 #pragma omp parallel for
 	for (int i = 0; i < differentVertices; i++)
@@ -84,10 +89,12 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 	// Find Parent Vertex of all vertices
 	int newn = n;
 	findParents1(ParentVertex, best, newn);
+	TE;
+	timesMap["Find Parents"] += gT;
 
 	
 	// Setup vector to rewrite
-
+	TS;
 	vector<tuple<int, int, int>> arr(n); // tuple<int,int,int> = ID -> Size -> index
 #pragma omp parallel for
 	for (int i = 0; i < n; i++)
@@ -101,14 +108,16 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 	vector<int> newSizes;
 	newSizes.reserve(m);
 	
-	rewriteVec(arr, newIdx, newSizes, numThreads,m);
-	
+	rewriteVecIMP(arr, newIdx, newSizes, numThreads,m,edgelist,ParentVertex);
+	TE;
+	timesMap["Rewrite Vector"] += gT;
 
 	// Count different Indices
 	outgoingSizes = newSizes;
 
 	// Insert found edges into mst
-#pragma omp parallel for
+	TS;
+	#pragma omp parallel for
 	for (int i = 0; i < n; i++)
 	{
 		if (best[i].weight > 0)
@@ -116,25 +125,14 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 			mstOneHot[best[i].idx] = 1;
 		}
 	}
-
+	TE;
+	timesMap["Insert into MST"] += gT;
 
 	// Write edgelist to new Indices
 
-	vector<edge> edgelist2 = edgelist;
-	
-#pragma omp parallel for
-	for (int i = 0; i < m; i++)
-	{
-		edgelist[i] = edgelist2[newIdx[i]];
-		edgelist[i].source = ParentVertex[edgelist[i].source];
-		edgelist[i].dest = ParentVertex[edgelist[i].dest];
-		//edge e = edgelist2[newIdx[i]];
-		//edgelist[i] = edge(ParentVertex[e.source],ParentVertex[e.dest],e.weight,e.idx);
-
-	}
 
 	// Create map to new vertex ids -> TODO Parallelize
-	
+	TS;
 	vector<int> mapper(n);
 	n = newSizes.size();
 	//int sum = 0;
@@ -143,7 +141,7 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 	for (int i = 0; i < outgoingSizes.size(); i++)
 	{
 		if(outgoingSizes[i] > 0){
-		mapper[edgelist[prefSum[i]].source] = i;
+		    mapper[edgelist[prefSum[i]].source] = i;
 		}
 	}
 	// Rename Edgelist again
@@ -152,11 +150,11 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 	{
 		edgelist[i].source = mapper[edgelist[i].source];
 		edgelist[i].dest = mapper[edgelist[i].dest];
-		edge e = edgelist[i];
+		
 	}
+	TE;
 	
-	
-	//timesMap["Resort edgelist"] += gT;
+	timesMap["Resort edgelist"] += gT;
 	
 
 	// delete Self edges, This can be done more efficient

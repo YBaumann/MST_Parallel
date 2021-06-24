@@ -1,4 +1,4 @@
-int steps = 4;
+int steps = 1;
 
 void checkEdgelist(vector<edge> edgelist, int n, int m){
 	assert(m == edgelist.size() && "Edgelist has too many edges");
@@ -62,10 +62,6 @@ void BoruvkaStepPrim(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<
 	vector<int> newSizes;
 	newSizes.reserve(m);
 
-	rewriteVec(arr, newIdx, newSizes, numThreads,m);
-
-	// Count different Indices
-	outgoingSizes = newSizes;
 
 	int foundedges = 0;
 	//#pragma omp parallel for
@@ -77,10 +73,12 @@ void BoruvkaStepPrim(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<
 			foundedges++;
 		}
 	}
-	std::cout << "We found: " << foundedges << " Edges this round\n";
 
 	// Write edgelist to new Indices
+	rewriteVec(arr, newIdx, newSizes, numThreads,m);
 
+	// Count different Indices
+	outgoingSizes = newSizes;
 	vector<edge> edgelist2 = edgelist;
 	
 	for (int i = 0; i < m; i++)
@@ -116,7 +114,7 @@ void BoruvkaStepPrim(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<
 	}
 	
 	// delete Self edges, This can be done more efficient
-	// cutEdgelist(edgelist, outgoingSizes ,m ,n ,numThreads);
+	//cutEdgelist(edgelist, outgoingSizes ,m ,n ,numThreads);
 }
 
 
@@ -124,6 +122,7 @@ void BoruvkaStepPrim(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<
 
 vector<edge> ParBoruvkaImp(vector<edge> edgelist, vector<edge> edgelistSingle, vector<int> outgoingSizes, int n, int m, int numThreads, int cutoff)
 {
+	startTimer1;
 	int stepsBeforeCutoff = 0;
 	omp_set_num_threads(numThreads);
 
@@ -141,6 +140,8 @@ vector<edge> ParBoruvkaImp(vector<edge> edgelist, vector<edge> edgelistSingle, v
 	int totalM = m;
 	std::cout << "Edgelistsize: " << m;nn;
 	// Steps until only one vertex remains <-> Mst has size n-1
+	endTimer1;
+	printTime1;
 	while (n > cutoff && n > steps)
 	{
 		stepsBeforeCutoff++;
@@ -150,23 +151,12 @@ vector<edge> ParBoruvkaImp(vector<edge> edgelist, vector<edge> edgelistSingle, v
 		{
 			ParentVertex[i] = i;
 		}
-		//Check edgelist
-		if(n == totalN)
-		BoruvkaStepPrim(edgelist, outgoingSizes, ParentVertex, n, totalM, numThreads, mstSol, totalN);
 		std::cout << "Edgelistsize: " << totalM << "\n";
 		std::cout << "n is now: " << n << "\n";
-		if(n > cutoff && n > steps){
-			vector<int> ParentVertex1(n);
-	#pragma omp parallel for
-		for (int i = 0; i < n; i++)
-		{
-			ParentVertex1[i] = i;
-		}
-			ImpStep(edgelist, outgoingSizes, ParentVertex1, n, totalM, numThreads, mstSol, totalN);
-		}
+		ImpStep(edgelist, outgoingSizes, ParentVertex, n, totalM, numThreads, mstSol, totalN);
 	}
 	std::cout << "We have " << stepsBeforeCutoff << " Steps before cutoff\n";
-
+	
 	TS;
 	// Sequential Cutoff
 	vector<edge> sols = MinimumSpanningTreeBoruvkaSeq(edgelist, n, m);
