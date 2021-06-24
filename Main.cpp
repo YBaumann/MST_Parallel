@@ -57,6 +57,8 @@ std::chrono::_V2::system_clock::time_point b2;
 #include "headers/vectorOperations.h"
 #include "headers/FindCorrectPlace.h"
 #include "headers/Structures.h"
+#include "headers/finParentsUndirected.h"
+#include "headers/primSteps.h"
 #include "headers/CSR_Format.h"
 #include "headers/EdgelistToAdjArray.h"
 #include "headers/BoruvkaSeq.h"
@@ -67,6 +69,7 @@ std::chrono::_V2::system_clock::time_point b2;
 #include "headers/BoruvkaPara.h"
 #include "headers/rewriteVector.h"
 #include "headers/cutEdgelist.h"
+#include "headers/ImpStep.h"
 #include "headers/ImpBoruvkaPara.h"
 #include "headers/TestCases.h"
 
@@ -80,7 +83,7 @@ std::chrono::_V2::system_clock::time_point b2;
 int main() {
 	// Setup I/O and timing
 	ifstream f;
-	f.open("Resources/BarabasiSparse1M3E.txt");
+	f.open("Resources/WattsStrogatz100.txt");
 	vector<edge> edgelist;
 	vector<edge> edgelistSingle;
 	for(auto e : toMap){
@@ -119,10 +122,10 @@ int main() {
 		outgoingEdges[edgelist[i].source]++;
 	}
 
-	int nrThreads = 64;
+	int nrThreads = 32;
 	TimerStart;
 	std::cout << "Starts\n";
-	int cutoff = 50;
+	int cutoff = 10;
 	vector<edge> solp = ParBoruvkaImp(edgelist, edgelistSingle, outgoingEdges, n, m, nrThreads, cutoff);
 	TimerEnd;
 	times.push_back(make_pair("Parallel Runtime", getTime));
@@ -131,15 +134,18 @@ int main() {
 	vector<edge> sols = MinimumSpanningTreeBoruvkaSeq(edgelistSingle, n, msingle);
 	TimerEnd;
 	times.push_back(make_pair("Sequential Runtime", getTime));
-	assert(is_Connected(sols, nSafe) && "Solution seq is not connected");
-	assert(is_Connected(solp, nSafe) && "Solution par is not connected");
+	//assert(is_Connected(sols, nSafe) && "Solution seq is not connected");
+	//assert(is_Connected(solp, nSafe) && "Solution par is not connected");
 	int parRes = 0;
 	set<int> seqSet;
 	set<int> parSet;
+	std::cout << "Found Parallel MST:\n";
 	for(auto e : solp){
+		//std::cout << e.source << ' ' << e.dest;nn;
 		parSet.insert(e.idx);
 		parRes += e.weight;
 	}
+	nn;
 	int seqRes = 0;
 	for(auto e : sols){
 		seqSet.insert(e.idx);

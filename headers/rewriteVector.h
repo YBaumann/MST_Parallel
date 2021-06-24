@@ -23,8 +23,8 @@ void rewriteVec(vector<tuple<int,int,int>> &arr, vector<int> &toRewrite, vector<
 	}
 	
 	// Parallelize this later
-	//std::sort(arr.begin(),arr.end());
-	parasort(arr.size(), arr, threadnr);
+	std::sort(arr.begin(),arr.end());
+	//parasort(arr.size(), arr, threadnr);
 
 #pragma omp parallel for
 	for(int i = 0; i < n; i++){
@@ -51,19 +51,24 @@ void rewriteVec(vector<tuple<int,int,int>> &arr, vector<int> &toRewrite, vector<
 	newSizes = vector<int>(n);
 
 #pragma omp parallel for
-	for(int i = 1; i < n-1; i++){
+	for(int i = 1; i < n; i++){
 		// Previous ID != This ID
 		if(get<0>(arr[i-1]) != get<0>(arr[i])){
 			newSizes[i] = 1;
 		}
 	}
+	std::cout << "NewSizes\n";
+	for(auto e : newSizes){
+		//std::cout << e << ' ';
+	}
+	nn;
 	vector<int> prefNewSizes(n);
 
 	// Get new Id for each Index
 	ParPrefixAnySize(prefNewSizes, newSizes, threadn);
 
 	// get number of vertices in edgelist
-	int newSize = prefNewSizes[n-1] + 1;
+	int newSize = prefNewSizes[n-1] + 1 + newSizes[n-1];
 	
 	// Write number of edges per supervertex into respective index
 	

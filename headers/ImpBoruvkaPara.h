@@ -1,3 +1,4 @@
+int steps = 4;
 
 void checkEdgelist(vector<edge> edgelist, int n, int m){
 	assert(m == edgelist.size() && "Edgelist has too many edges");
@@ -8,103 +9,46 @@ void checkEdgelist(vector<edge> edgelist, int n, int m){
 	}
 }
 
-void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> ParentVertex, int &n, int &m, int numThreads, vector<int> &mstOneHot, int TotalN)
+void BoruvkaStepPrim(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> ParentVertex, int &n, int &m, int numThreads, vector<int> &mstOneHot, int TotalN)
 {
 	// Datastructures
 	vector<edge> best(n, edge(0,0,0,0));
-	vector<edge> PrefixScanVector(2 * numThreads, edge(0,0,0,0));
+	int stepsize = 10;//steps; // Finds 2 new edges!
+	int nrStarters = 40;//numThreads;
+	vector<pair<edge,int>> res((stepsize - 1) * nrStarters); // Found edge, start
 
-	// Divide Workload per processor
-	int workloadPerProcessor = m / numThreads;
-	int workloadLastProcessor = m - ((numThreads - 1) * workloadPerProcessor);
-	// Find best edge for each vector
-
-	TS;
-#pragma omp parallel for
-	for (int tr = 0; tr < numThreads; tr++)
-	{
-		int Tid = tr;
-		int startWL = Tid * workloadPerProcessor;	  // included
-		int endWL = (Tid + 1) * workloadPerProcessor; // not included
-		if (Tid == numThreads - 1)
-		{
-			endWL = m;
-		}
-		// Find best edges for all vertices
-		vector<edge> proposalStartEnd(2, edge(0,0,0,0)); // first entry is proposal for start, second entry is proposal for end
-		for (int i = startWL; i < endWL; i++)
-		{
-			edge e = edgelist[i];
-
-			// Find Vertices that might collide
-			int startVertexIndices = edgelist[startWL].source;
-			int endVertexIndices = edgelist[endWL - 1].source;
-
-			// Compute best edges for my local vertices
-			if (e.source == e.dest)
-			{
-				continue;
-			}
-
-			if (e.source == startVertexIndices)
-			{ // proposal coliding start
-				if (proposalStartEnd[0] > e || proposalStartEnd[0].weight == 0)
-				{
-					proposalStartEnd[0] = e;
-				}
-			}
-			else if (e.source == endVertexIndices)
-			{ // Proposal coliding end
-				if (proposalStartEnd[1] > e || proposalStartEnd[1].weight == 0)
-				{
-					proposalStartEnd[1] = e;
-				}
-			} else if (e.source < endVertexIndices && e.source > startVertexIndices)
-			{ // non coliding
-				if ((best[e.source] > e) || best[e.source].weight == 0)
-				{
-					best[e.source] = e;
-				}
-			}
-		}
-
-		// Insert propositions into vector
-		PrefixScanVector[2 * tr] = proposalStartEnd[0];
-		PrefixScanVector[2 * tr + 1] = proposalStartEnd[1];
-	}
-	TE;
-	timesMap["Calc Best"] += gT;
-
-	// now do multiprefix scan, apparently really fast!
-
-	TS;
-	int differentVertices = 0;
-	multiPrefixScan(PrefixScanVector, differentVertices);
-	// now insert found edges in parallel
-	// The first differentEdges entries of PrefixScanVec hold the edges we need
-	TE;
-	timesMap["Multi Pref"] += gT;
-
-	int InsertWeights = 0;
-	TS;
-
-#pragma omp parallel for
-	for (int i = 0; i < differentVertices; i++)
-	{
-		if(PrefixScanVector[i].weight > 0){
-			best[PrefixScanVector[i].source] = PrefixScanVector[i];
-		}
-	}
-
-	// Find Parent Vertex of all vertices
-	int newn = n;
-	findParents1(ParentVertex, best, newn);
-	TE;
-	timesMap["Find Parents"] += gT;
-
+	vector<int> pref;
+	ParPrefixAnySize(pref,outgoingSizes,numThreads);
 	
-	// Setup vector to rewrite
-	TS;
+	startTimer1;
+	#pragma omp parallel for
+	for (int tr = 0; tr < nrStarters; tr++)
+	{
+		std::cout << tr*n/nrStarters << ' ';
+		vector<pair<int,int>> visPairs;
+		
+		vector<pair<edge,int>> res1 = doKPrimSteps(visPairs,edgelist,pref,outgoingSizes,tr*n/nrStarters,stepsize,n); // edge in mst + starter
+		for(int i = 0; i < res1.size(); i++){
+			res[tr*(stepsize-1) + i] = res1[i];
+		}
+		
+	}
+	endTimer1;
+	printTime1;
+	int idle = 0;
+	for(int i = 0; i < res.size(); i++){
+		std::cout << res[i].first.source << "->" << res[i].first.dest<< ' ';
+		if(res[i].first.source == res[i].first.dest){
+			
+			idle++;
+		}
+	}
+	nn;
+	std::cout << idle <<  " Idle edges this round\n";
+	
+	vector<edge> Usefuledges;
+	ParentVertex = findParentsP(res,n,numThreads,Usefuledges);
+
 	vector<tuple<int, int, int>> arr(n); // tuple<int,int,int> = ID -> Size -> index
 #pragma omp parallel for
 	for (int i = 0; i < n; i++)
@@ -117,32 +61,28 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 	vector<int> newIdx(m);
 	vector<int> newSizes;
 	newSizes.reserve(m);
-	
+
 	rewriteVec(arr, newIdx, newSizes, numThreads,m);
-	TE;
-	timesMap["Rewrite Vector"] += gT;
 
 	// Count different Indices
 	outgoingSizes = newSizes;
 
-	// Insert found edges into mst
-	TS;
-	#pragma omp parallel for
-	for (int i = 0; i < n; i++)
+	int foundedges = 0;
+	//#pragma omp parallel for
+	for (int i = 0; i < Usefuledges.size(); i++)
 	{
-		if (best[i].weight > 0)
+		if (Usefuledges[i].weight > 0 && Usefuledges[i].source != Usefuledges[i].dest)
 		{
-			mstOneHot[best[i].idx] = 1;
+			mstOneHot[Usefuledges[i].idx] = 1;
+			foundedges++;
 		}
 	}
-	TE;
-	timesMap["Insert into MST"] += gT;
+	std::cout << "We found: " << foundedges << " Edges this round\n";
 
 	// Write edgelist to new Indices
-	TS;
+
 	vector<edge> edgelist2 = edgelist;
 	
-#pragma omp parallel for
 	for (int i = 0; i < m; i++)
 	{
 		edgelist[i] = edgelist2[newIdx[i]];
@@ -150,14 +90,10 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 		edgelist[i].dest = ParentVertex[edgelist[i].dest];
 		//edge e = edgelist2[newIdx[i]];
 		//edgelist[i] = edge(ParentVertex[e.source],ParentVertex[e.dest],e.weight,e.idx);
-
+		//std::cout << edgelist[i].source << ' ' << edgelist[i].dest;nn;
 	}
-	TE;
-	timesMap["Rename to Supervertex"] += gT;
-
-
-	// Create map to new vertex ids -> TODO Parallelize
-	TS;
+	
+	
 	vector<int> mapper(n);
 	n = newSizes.size();
 	//int sum = 0;
@@ -169,6 +105,7 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 		mapper[edgelist[prefSum[i]].source] = i;
 		}
 	}
+
 	// Rename Edgelist again
 #pragma omp parallel for
 	for (int i = 0; i < m; i++)
@@ -177,14 +114,9 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 		edgelist[i].dest = mapper[edgelist[i].dest];
 		edge e = edgelist[i];
 	}
-	TE;
 	
-	timesMap["Resort edgelist"] += gT;
-	
-
 	// delete Self edges, This can be done more efficient
 	// cutEdgelist(edgelist, outgoingSizes ,m ,n ,numThreads);
-
 }
 
 
@@ -192,6 +124,7 @@ void ImpStep(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<int> Par
 
 vector<edge> ParBoruvkaImp(vector<edge> edgelist, vector<edge> edgelistSingle, vector<int> outgoingSizes, int n, int m, int numThreads, int cutoff)
 {
+	int stepsBeforeCutoff = 0;
 	omp_set_num_threads(numThreads);
 
 	// We store the edges we need in our mst here. At this pount m will always be even!
@@ -208,9 +141,9 @@ vector<edge> ParBoruvkaImp(vector<edge> edgelist, vector<edge> edgelistSingle, v
 	int totalM = m;
 	std::cout << "Edgelistsize: " << m;nn;
 	// Steps until only one vertex remains <-> Mst has size n-1
-	while (n > cutoff)
+	while (n > cutoff && n > steps)
 	{
-
+		stepsBeforeCutoff++;
 		vector<int> ParentVertex(n);
 	#pragma omp parallel for
 		for (int i = 0; i < n; i++)
@@ -218,9 +151,21 @@ vector<edge> ParBoruvkaImp(vector<edge> edgelist, vector<edge> edgelistSingle, v
 			ParentVertex[i] = i;
 		}
 		//Check edgelist
-		ImpStep(edgelist, outgoingSizes, ParentVertex, n, totalM, numThreads, mstSol, totalN);
+		if(n == totalN)
+		BoruvkaStepPrim(edgelist, outgoingSizes, ParentVertex, n, totalM, numThreads, mstSol, totalN);
 		std::cout << "Edgelistsize: " << totalM << "\n";
+		std::cout << "n is now: " << n << "\n";
+		if(n > cutoff && n > steps){
+			vector<int> ParentVertex1(n);
+	#pragma omp parallel for
+		for (int i = 0; i < n; i++)
+		{
+			ParentVertex1[i] = i;
+		}
+			ImpStep(edgelist, outgoingSizes, ParentVertex1, n, totalM, numThreads, mstSol, totalN);
+		}
 	}
+	std::cout << "We have " << stepsBeforeCutoff << " Steps before cutoff\n";
 
 	TS;
 	// Sequential Cutoff
