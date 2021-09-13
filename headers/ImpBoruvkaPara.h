@@ -122,7 +122,7 @@ void BoruvkaStepPrim(vector<edge> &edgelist, vector<int> &outgoingSizes, vector<
 
 vector<edge> ParBoruvkaImp(vector<edge> edgelist, vector<edge> edgelistSingle, vector<int> outgoingSizes, int n, int m, int numThreads, int cutoff)
 {
-	startTimer1;
+	
 	int stepsBeforeCutoff = 0;
 	omp_set_num_threads(numThreads);
 
@@ -140,8 +140,7 @@ vector<edge> ParBoruvkaImp(vector<edge> edgelist, vector<edge> edgelistSingle, v
 	int totalM = m;
 	std::cout << "Edgelistsize: " << m;nn;
 	// Steps until only one vertex remains <-> Mst has size n-1
-	endTimer1;
-	printTime1;
+	
 	while (n > cutoff && n > steps)
 	{
 		stepsBeforeCutoff++;

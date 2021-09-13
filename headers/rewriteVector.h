@@ -94,7 +94,7 @@ void rewriteVec(vector<tuple<int,int,int>> &arr, vector<int> &toRewrite, vector<
 void rewriteVecIMP(vector<tuple<int,int,int>> &arr, vector<int> &toRewrite, vector<int> &newSizes, int threadnr, int m, vector<edge> &edgelist, vector<int> &ParentVertex){ // ID -> Size -> index
 	int threadn = threadnr;
 	int n = arr.size();
-
+	
 	// Set up all vectors needed
 	vector<edge> edgelist2 = edgelist;
 	vector<int> sizesOld(n);
@@ -111,26 +111,32 @@ void rewriteVecIMP(vector<tuple<int,int,int>> &arr, vector<int> &toRewrite, vect
 	
 	// Parallelize this later
 	//std::sort(arr.begin(),arr.end());
+	startTimer1;
 	parasort(arr.size(), arr, threadnr);
+
+	endTimer1;
+	printTime1;
 
 #pragma omp parallel for
 	for(int i = 0; i < n; i++){
 		sizesNewOrder[i] = get<1>(arr[i]);
 	}
 
+	
 	ParPrefixAnySize(oldStartIndices, sizesOld, threadn);
 	ParPrefixAnySize(newStartIndices, sizesNewOrder, threadn);
 	// calculate the indices for each edge of the new edgelist
-
+	
 	
 #pragma omp parallel for
 	for(int i = 0; i < n; i++){
 		int Idn = get<2>(arr[i]);
 		int nrEdges = sizesOld[Idn];
 		for(int j = 0; j < nrEdges; j++){
-			edgelist[newStartIndices[i] + j] = edgelist2[oldStartIndices[Idn] + j];
-			edgelist[newStartIndices[i] + j].source = ParentVertex[edgelist[newStartIndices[i] + j].source];
-			edgelist[newStartIndices[i] + j].dest =  ParentVertex[edgelist[newStartIndices[i] + j].dest];
+			edge e = edgelist2[oldStartIndices[Idn] + j];
+			e.source = ParentVertex[e.source];
+			e.dest = ParentVertex[e.dest];
+			edgelist[newStartIndices[i] + j] = e;
 		}
 	}
 
@@ -148,6 +154,7 @@ void rewriteVecIMP(vector<tuple<int,int,int>> &arr, vector<int> &toRewrite, vect
 	}
 	vector<int> prefNewSizes(n);
 
+	
 	// Get new Id for each Index
 	ParPrefixAnySize(prefNewSizes, newSizes, threadn);
 

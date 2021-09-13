@@ -83,21 +83,20 @@ std::chrono::_V2::system_clock::time_point b2;
 int main() {
 	// Setup I/O and timing
 	ifstream f;
-	f.open("Resources/WattsStrogatz100K.txt");
+	f.open("Resources/BarabasiSparse1M3E.txt");
 	vector<edge> edgelist;
 	vector<edge> edgelistSingle;
 	for(auto e : toMap){
 		timesMap.insert(make_pair(e,0));
 	}
 
-
-	int n; f >> n;
-	int m; f >> m;
-	int nSafe = n;
-	for (int i = 0; i < m; i++) {
-		edge e1 = edge(0,0,0,0);
-		e1.idx = i;
-		f >> e1.source >> e1.dest >> e1.weight;
+	int source,dest,weight;
+	int n,m;
+	int i = 0;
+	while(f >> source && f >> dest && f >> weight){
+		n = max(n,max(source,dest));
+		m++;
+		edge e1 = edge(source,dest,weight,i++);
 		edge e2 = edge(e1.dest,e1.source, e1.weight, e1.idx);
 		edgelist.push_back(e1);
 		edgelist.push_back(e2);
@@ -105,6 +104,8 @@ int main() {
 		assert(e1.weight > 0 && "Weights may not be 0");
 	}
 	// We add two edges
+	n += 1;
+	int nSafe = n;
 	int msingle = m;
 	m = 2*m;
 	std::cout << "Read everything\n";
@@ -122,18 +123,21 @@ int main() {
 		outgoingEdges[edgelist[i].source]++;
 	}
 
-	int nrThreads = 32;
+	TimerStart;
+	vector<edge> sols = MinimumSpanningTreeBoruvkaSeq(edgelistSingle, n, msingle);
+	TimerEnd;
+	times.push_back(make_pair("Sequential Runtime", getTime));
+
+	std::cout << "Start Parallel:\n";
+
 	TimerStart;
 	std::cout << "Starts\n";
+	int nrThreads = 8;
 	int cutoff = 100;
 	vector<edge> solp = ParBoruvkaImp(edgelist, edgelistSingle, outgoingEdges, n, m, nrThreads, cutoff);
 	TimerEnd;
 	times.push_back(make_pair("Parallel Runtime", getTime));
 
-	TimerStart;
-	vector<edge> sols = MinimumSpanningTreeBoruvkaSeq(edgelistSingle, n, msingle);
-	TimerEnd;
-	times.push_back(make_pair("Sequential Runtime", getTime));
 	assert(is_Connected(sols, nSafe) && "Solution seq is not connected");
 	assert(is_Connected(solp, nSafe) && "Solution par is not connected");
 	int parRes = 0;
